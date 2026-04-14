@@ -1,6 +1,12 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from 'dotenv';
+import { User } from "./models/User";
+import { Repository } from "./models/Repository";
+import { Submission } from "./models/Submission";
+import { Benchmark } from "./models/Benchmark";
+import { AlgorithmPattern } from "./models/AlgorithmPattern";
+
 dotenv.config()
 export const AppDataSource = new DataSource({
     type: "mysql",
@@ -11,7 +17,7 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     synchronize: true, // Auto-creates/updates tables based on your Entities
     logging: true,     // Log SQL queries to console
-    entities: [],      // We will add classes here shortly
+    entities: [User, Repository, Submission, Benchmark, AlgorithmPattern],
     subscribers: [],
     migrations: [],
 });
