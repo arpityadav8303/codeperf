@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import express from 'express';
 import dotenv from 'dotenv';
 //import mysql2 from 'mysql2';
-import { AppDataSource } from "./data-source.js";
+import { AppDataSource } from "./data-source";
 
 dotenv.config();
 
