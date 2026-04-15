@@ -15,7 +15,7 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    synchronize: true, // Auto-creates/updates tables based on your Entities
+    synchronize: false, // Auto-creates/updates tables based on your Entities
     logging: true,     // Log SQL queries to console
     entities: [User, Repository, Submission, Benchmark, AlgorithmPattern],
     subscribers: [],
