@@ -10,13 +10,12 @@ export class User {
     @Column("varchar", { nullable: true })
     name!: string | null;
 
-
-
     @Column("varchar", { unique: true, nullable: true })
     email!: string | null;
 
-    @Column("varchar", { nullable: true, select: false })
-    passwordHash!: string | null;
+    @Column("varchar", { select: false })
+    passwordHash!: string;
+
 
     @Index()
     @Column("varchar", { unique: true, nullable: true })

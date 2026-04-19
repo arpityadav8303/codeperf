@@ -2,13 +2,14 @@ import 'reflect-metadata';
 import express from 'express';
 import dotenv from 'dotenv';
 import { AppDataSource } from "./data-source";
-import { AuthRoutes } from "./routes";
+import { registerRoutes } from "./routes";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-AuthRoutes(app);
+registerRoutes(app);
+
 
 AppDataSource.initialize()
     .then(() => {

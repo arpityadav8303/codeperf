@@ -1,10 +1,18 @@
-import { Express } from "express";
+import { Express, Router } from "express";
 import authRoutes from "./Auth.routes";
 
-export function AuthRoutes(app: Express) {
-  app.use("/register", authRoutes);
+export function registerRoutes(app: Express) {
+    const apiRouter = Router();
 
-  app.get("/health", (req, res) => {
-    res.json({ success: true, message: "CodePerf API is running" });
-  });
+    console.log("Registering API routes under /api/v1...");
+
+    apiRouter.get("/health", (req, res) => {
+        res.json({ success: true, message: "CodePerf API is running" });
+    });
+
+    apiRouter.use("/auth", authRoutes);
+
+    app.use("/api/v1", apiRouter);
+    
+    console.log("API routes mounted successfully.");
 }

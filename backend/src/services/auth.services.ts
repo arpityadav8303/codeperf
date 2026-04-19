@@ -37,9 +37,10 @@ export class UserService{
         };
 
     }
-    async findOne(condition:any) {
-        return await this.userRepo.findOneBy(condition);
+    async findOne(options: any) {
+        return await this.userRepo.findOne(options);
     }
+
     async find(condition:any){
         return await this.userRepo.find(condition);
     }
