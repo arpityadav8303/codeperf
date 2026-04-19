@@ -1,12 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index, CreateDateColumn } from "typeorm";
 import { User } from "./User";
 
 @Entity("repositories")
+@Index(["githubRepoId", "user"], { unique: true })
 export class Repository {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
     @Column()
+    @Index()
     githubRepoId!: string;
 
     @Column()
@@ -21,7 +23,13 @@ export class Repository {
     @Column("float", { default: 2.0 })
     regressionThresholdX!: number;
 
-    @ManyToOne(() => User, (user: User) => user.repositories, { nullable: false })
+    @CreateDateColumn()
+    createdAt!: Date;
+
+    @ManyToOne(() => User, (user: User) => user.repositories, {
+        nullable: false,
+        onDelete: "CASCADE"
+    })
     @JoinColumn({ name: "userId" })
     user!: User;
 }

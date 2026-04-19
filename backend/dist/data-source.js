@@ -20,7 +20,7 @@ exports.AppDataSource = new typeorm_1.DataSource({
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    synchronize: true, // Auto-creates/updates tables based on your Entities
+    synchronize: false, // Auto-creates/updates tables based on your Entities
     logging: true, // Log SQL queries to console
     entities: [User_1.User, Repository_1.Repository, Submission_1.Submission, Benchmark_1.Benchmark, AlgorithmPattern_1.AlgorithmPattern],
     subscribers: [],
