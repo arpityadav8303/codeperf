@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { UserService } from "../services/auth.services";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth";
 import bcrypt from 'bcrypt';
+import { verifyRefreshToken } from "../utils/auth";
 import { success } from "zod";
 export class UserAuth {
     constructor(private userService = new UserService()) { }
@@ -94,22 +95,22 @@ export class UserAuth {
         try {
             const { oldPassword, newPassword } = req.body;
             const userId = req.user.id;
-            const user = await this.userService.findOne({ 
+            const user = await this.userService.findOne({
                 where: { id: userId },
-                select: ["id", "passwordHash", "name", "email"] 
+                select: ["id", "passwordHash", "name", "email"]
             });
-            if(!user){
+            if (!user) {
                 return res.status(404).json({
-                    success:false,
-                    message:"User not found"
+                    success: false,
+                    message: "User not found"
                 })
             }
 
             const passwordMatch = await bcrypt.compare(oldPassword, user.passwordHash);
-            if(!passwordMatch){
+            if (!passwordMatch) {
                 return res.status(401).json({
-                    success:false,
-                    message:"Invalid old password"
+                    success: false,
+                    message: "Invalid old password"
                 })
             }
 
@@ -129,6 +130,73 @@ export class UserAuth {
         }
     }
 
+    async logoutUser(req: Request, res: Response) {
+        try {
+            const userId = req.user.id;
+            const user = await this.userService.findOne({ where: { id: userId } })
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: "User not found"
+                })
+            }
+            return res.status(200).json({
+                success: true,
+                message: "Logout successful"
+            });
+        } catch (error: any) {
+            return res.status(error.status || 500).json({
+                success: false,
+                message: error.message || "Internal Server Error"
+            });
+        }
+    }
+
+    async getMe(req: Request, res: Response) {
+        try {
+            const userId = req.user.id;
+            const user = await this.userService.findOne({
+                where: { id: userId },
+                select: ["id", "name", "email"]
+            });
+
+            if (!user) {
+                return res.status(404).json({ success: false, message: "User not found" });
+            }
+
+            return res.status(200).json({
+                success: true,
+                data: user
+            });
+        } catch (error: any) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+    
+    async refreshToken(req: Request, res: Response) {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            return res.status(400).json({ success: false, message: "Refresh token required" });
+        }
+
+        const decoded = verifyRefreshToken(refreshToken) as any; 
+        
+        const accessToken = generateAccessToken(decoded.userId);
+        const newRefreshToken = generateRefreshToken(decoded.userId);
+
+        return res.status(200).json({
+            success: true,
+            accessToken,
+            refreshToken: newRefreshToken
+        });
+    } catch (error: any) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired refresh token"
+        });
+    }
+}
 }
 
 export const authController = new UserAuth();
