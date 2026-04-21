@@ -60,6 +60,7 @@ export class UserService {
             user.avatarUrl = githubData.avatarUrl;
             user.githubUsername = githubData.githubUsername
             user.githubId = githubData.githubId;
+            return await this.userRepo.save(user);
         }
         if (githubData.email) {
             user = await this.userRepo.findOne({
