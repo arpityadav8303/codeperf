@@ -3,6 +3,7 @@ import { UserService } from "../services/auth.services";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth";
 import bcrypt from 'bcrypt';
 import { verifyRefreshToken } from "../utils/auth";
+import { getGithubAccessToken, getGithubUserProfile } from "../utils/github";
 import { success } from "zod";
 export class UserAuth {
     constructor(private userService = new UserService()) { }
@@ -172,31 +173,35 @@ export class UserAuth {
             return res.status(500).json({ success: false, message: error.message });
         }
     }
-    
+
     async refreshToken(req: Request, res: Response) {
-    try {
-        const { refreshToken } = req.body;
-        if (!refreshToken) {
-            return res.status(400).json({ success: false, message: "Refresh token required" });
+        try {
+            const { refreshToken } = req.body;
+            if (!refreshToken) {
+                return res.status(400).json({ success: false, message: "Refresh token required" });
+            }
+
+            const decoded = verifyRefreshToken(refreshToken) as any;
+
+            const accessToken = generateAccessToken(decoded.userId);
+            const newRefreshToken = generateRefreshToken(decoded.userId);
+
+            return res.status(200).json({
+                success: true,
+                accessToken,
+                refreshToken: newRefreshToken
+            });
+        } catch (error: any) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid or expired refresh token"
+            });
         }
-
-        const decoded = verifyRefreshToken(refreshToken) as any; 
-        
-        const accessToken = generateAccessToken(decoded.userId);
-        const newRefreshToken = generateRefreshToken(decoded.userId);
-
-        return res.status(200).json({
-            success: true,
-            accessToken,
-            refreshToken: newRefreshToken
-        });
-    } catch (error: any) {
-        return res.status(401).json({
-            success: false,
-            message: "Invalid or expired refresh token"
-        });
     }
-}
+    
+    async githubCallback(req: Request, res: Response) {
+        const {userName, avatar, githubId} = req.query;
+    }
 }
 
 export const authController = new UserAuth();

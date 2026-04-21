@@ -3,9 +3,6 @@ import authRoutes from "./Auth.routes";
 
 export function registerRoutes(app: Express) {
     const apiRouter = Router();
-
-    console.log("Registering API routes under /api/v1...");
-
     apiRouter.get("/health", (req, res) => {
         res.json({ success: true, message: "CodePerf API is running" });
     });
