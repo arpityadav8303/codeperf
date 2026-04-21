@@ -1,10 +1,10 @@
 import { UserRepository } from "../repositiory/auth.controller.repo";
 import { User } from "../models/User";
 import bcrypt from 'bcrypt'
-export class UserService{
-    constructor(private userRepo = UserRepository) {}
+export class UserService {
+    constructor(private userRepo = UserRepository) { }
 
-     async register({ name, email, password }: any) {
+    async register({ name, email, password }: any) {
 
         if (!email || !password) {
             throw { status: 400, message: "Email and password required" };
@@ -41,17 +41,47 @@ export class UserService{
         return await this.userRepo.findOne(options);
     }
 
-    async find(condition:any){
+    async find(condition: any) {
         return await this.userRepo.find(condition);
     }
-    async create(user:User){
+    async create(user: User) {
         return await this.userRepo.save(user);
     }
-    async update(id:string,user:User){
-        return await this.userRepo.update(id,user);
+    async update(id: string, user: User) {
+        return await this.userRepo.update(id, user);
     }
-    async delete(id:string){
+    async delete(id: string) {
         return await this.userRepo.delete(id);
+    }
+
+    async findOrCreateGithubUser(githubData: { githubId: string, name: string, email: string | null, avatarUrl: string, githubUsername: string }) {
+        let user = await this.userRepo.findOne({ where: { githubId: githubData.githubId } })
+        if (user) {
+            user.avatarUrl = githubData.avatarUrl;
+            user.githubUsername = githubData.githubUsername
+            user.githubId = githubData.githubId;
+        }
+        if (githubData.email) {
+            user = await this.userRepo.findOne({
+                where: { email: githubData.email.toLowerCase().trim() }
+            });
+
+            if (user) {
+                user.githubId = githubData.githubId;
+                user.githubUsername = githubData.githubUsername;
+                user.avatarUrl = githubData.avatarUrl;
+                return await this.userRepo.save(user);
+            }
+        }
+        const newUser = this.userRepo.create({
+            githubId: githubData.githubId,
+            githubUsername: githubData.githubUsername,
+            email: githubData.email ? githubData.email.toLowerCase().trim() : null,
+            name: githubData.name,
+            avatarUrl: githubData.avatarUrl,
+            passwordHash: ""
+        })
+        return await this.userRepo.save(newUser);
     }
 }
 

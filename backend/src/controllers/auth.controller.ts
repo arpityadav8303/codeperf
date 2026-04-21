@@ -198,9 +198,40 @@ export class UserAuth {
             });
         }
     }
-    
+
+    async githubLogin(req: Request, res: Response) {
+        const rootURL = 'https://github.com/login/oauth/authorize';
+        const options = {
+            client_id: process.env.GITHUB_CLIENT_ID as string,
+            redirect_uri: process.env.GITHUB_REDIRECT_URI as string,
+            scope: 'read:user user:email',
+            state: 'some_random_string',
+        }
+        const queryString = new URLSearchParams(options).toString();
+        return res.redirect(`${rootURL}?${queryString}`);
+    }
+
     async githubCallback(req: Request, res: Response) {
-        const {userName, avatar, githubId} = req.query;
+        try {
+            const { code } = req.query;
+            if (!code) {
+                return res.status(400).json({
+                    success: false, message: "Authorization code not provided"
+                });
+            }
+            const accessToken = await getGithubAccessToken(code as string);
+            const githubUser = await getGithubUserProfile(accessToken);
+            let user = await this.userService.findOrCreateGithubUser(githubUser)
+            const appAccessToken = generateAccessToken(user.id);
+            const appRefreshToken = generateRefreshToken(user.id);
+            const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+            return res.redirect(`${FRONTEND_URL}/login-success?token=${appAccessToken}`);
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                Message: "error"
+            })
+        }
     }
 }
 
