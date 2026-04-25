@@ -221,7 +221,13 @@ export class UserAuth {
             }
             const accessToken = await getGithubAccessToken(code as string);
             const githubUser = await getGithubUserProfile(accessToken);
-            let user = await this.userService.findOrCreateGithubUser(githubUser)
+            let user = await this.userService.findOrCreateGithubUser({
+                githubId: String(githubUser.id),
+                githubUsername: githubUser.login,
+                name: githubUser.name || githubUser.login,
+                email: githubUser.email,
+                avatarUrl: githubUser.avatar_url
+            })
             const appAccessToken = generateAccessToken(user.id);
             const appRefreshToken = generateRefreshToken(user.id);
             const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';

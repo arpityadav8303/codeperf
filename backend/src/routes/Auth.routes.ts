@@ -10,7 +10,7 @@ router.put("/change-password", rateLimiter.limit({ limit: 5, windowSeconds: 60 }
 router.get("/me", authenticate, rateLimiter.limit({ limit: 5, windowSeconds: 60 }), (req, res) => authController.getMe(req, res));
 router.post("/logout", authenticate, rateLimiter.limit({ limit: 5, windowSeconds: 60 }), (req, res) => authController.logoutUser(req, res));
 router.post("/refresh", (req, res) => authController.refreshToken(req, res));
-router.get("/githubLogin", (req,res) => authController.githubLogin(req, res));
+router.get("/github", (req,res) => authController.githubLogin(req, res));
 router.get("/github/callback", (req, res) => authController.githubCallback(req, res));
 export default router;
 
