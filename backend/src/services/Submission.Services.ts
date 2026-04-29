@@ -2,12 +2,14 @@ import { SubmissionRepository } from "../repositiory/Submission.Repo";
 import { BenchmarkRepository } from "../repositiory/Benchmark.Repo";
 import { Submission } from "../models/Submission";
 import { Benchmark } from "../models/Benchmark";
+import { createQueryBuilder, getRepository } from "typeorm";
+import { AppDataSource } from "../data-source"
 
 export class SubmissionService {
     constructor(
-        private subRepo: SubmissionRepository,
-        private benchRepo: BenchmarkRepository,
-    ) {}
+        private subRepo = SubmissionRepository,
+        private benchRepo = BenchmarkRepository,
+    ) { }
 
     async processSubmission(code: string, language: string, userId: string): Promise<any> {
         // 1. Save the submission (defaults to 'queued')
@@ -37,5 +39,20 @@ export class SubmissionService {
 
         // 4. Return the completed submission
         return completedSubmission;
+    }
+
+    async findById(id: any): Promise<any> {
+        return this.subRepo.findOne(id);
+    }
+
+    async findWithBenchmark(id: any): Promise<any> {
+        const result = await AppDataSource
+            .getRepository(Submission)
+            .createQueryBuilder("submission")
+            .leftJoinAndSelect("submission.benchmark", "benchmark")
+            .where("submission.id = :id", { id })
+            .getOne();
+
+        return result;
     }
 }

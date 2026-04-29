@@ -1,6 +1,5 @@
-import { Repository, DataSource } from "typeorm";
+import { AppDataSource } from "../data-source";
 import { Submission } from "../models/Submission";
 
-export class SubmissionRepository extends Repository<Submission> {
-
-}
+export const SubmissionRepository = AppDataSource.getRepository(Submission).extend({
+});

@@ -2,7 +2,7 @@ import { UserRepository } from "../repositiory/auth.controller.repo";
 import { User } from "../models/User";
 import bcrypt from 'bcrypt'
 export class UserService {
-    constructor(private userRepo: UserRepository) { }
+    constructor(private userRepo = UserRepository) { }
 
     async register({ name, email, password }: any) {
 
