@@ -2,7 +2,6 @@ import { SubmissionRepository } from "../repositiory/Submission.Repo";
 import { BenchmarkRepository } from "../repositiory/Benchmark.Repo";
 import { Submission } from "../models/Submission";
 import { Benchmark } from "../models/Benchmark";
-import { createQueryBuilder, getRepository } from "typeorm";
 import { AppDataSource } from "../data-source"
 
 export class SubmissionService {
@@ -42,14 +41,14 @@ export class SubmissionService {
     }
 
     async findById(id: any): Promise<any> {
-        return this.subRepo.findOne(id);
+        return this.subRepo.findOneBy({ id });
     }
 
     async findWithBenchmark(id: any): Promise<any> {
         const result = await AppDataSource
             .getRepository(Submission)
             .createQueryBuilder("submission")
-            .leftJoinAndSelect("submission.benchmark", "benchmark")
+            .leftJoinAndSelect("submission.benchmarks", "benchmark")
             .where("submission.id = :id", { id })
             .getOne();
 
