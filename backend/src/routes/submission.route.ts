@@ -6,6 +6,7 @@ import { rateLimiter } from "../middlewares/rateLimiter.middleware";
 const router = Router();
 
 // Create a new submission
+router.get("/allSubmissions", authenticate, (req,res)=> submissionController.getAllSubmissionsOfUser(req,res))
 router.post("/", 
     authenticate, 
     rateLimiter.limit({ limit: 5, windowSeconds: 60 }), 
@@ -25,5 +26,6 @@ router.get("/:id/benchmark",
     rateLimiter.limit({ limit: 10, windowSeconds: 60 }), 
     (req, res) => submissionController.getSubmissionWithBenchmark(req, res)
 );
+
 
 export default router;

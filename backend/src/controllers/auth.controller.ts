@@ -50,7 +50,6 @@ export class UserAuth {
                 select: ["id", "name", "email", "passwordHash"]
             });
 
-
             if (!user || !user.passwordHash) {
                 return res.status(400).json({
                     success: false,

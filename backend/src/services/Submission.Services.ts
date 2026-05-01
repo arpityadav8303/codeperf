@@ -54,4 +54,8 @@ export class SubmissionService {
 
         return result;
     }
+
+    async getAllSubmissions(userId: string,limit: number,offset: number, filters?: { language?: string; complexity?: string }): Promise<any> {
+        return this.subRepo.getAllSubmissions(userId,limit,offset,filters);
+    }
 }

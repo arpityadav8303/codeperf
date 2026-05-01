@@ -6,7 +6,6 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     try {
         const authHeader = req.headers.authorization;
         const token = authHeader && authHeader.split(' ')[1];
-
         if (!token) {
             return res.status(401).json({
                 success: false,

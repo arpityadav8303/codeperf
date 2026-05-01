@@ -1,3 +1,4 @@
+import { success } from "zod";
 import { SubmissionService } from "../services/Submission.Services";
 import { Request, Response } from "express";
 export class Submission {
@@ -68,5 +69,31 @@ export class Submission {
             });
         }
     }
+
+    async getAllSubmissionsOfUser(req: Request, res: Response): Promise<any> {
+    try {
+        const limit = parseInt(req.query.limit as string) || 10;
+        const page = parseInt(req.query.page as string) || 1;
+        const offset = (page - 1) * limit;
+        const filters = {
+            language: req.query.language as string,
+            complexity: req.query.complexity as string
+        };
+
+        const { id } = req.user; 
+
+        const data = await this.submissionService.getAllSubmissions(id, limit, offset, filters);
+        
+        return res.status(200).json({
+            success: true,
+            data,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: `${error}`
+        });
+    }
+}
 }
 export default new Submission();
