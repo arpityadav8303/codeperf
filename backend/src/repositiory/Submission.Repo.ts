@@ -2,19 +2,23 @@ import { AppDataSource } from "../data-source";
 import { Submission } from "../models/Submission";
 
 export const SubmissionRepository = AppDataSource.getRepository(Submission).extend({
-    async getAllSubmissions(userId: string,limit: number,offset: number, filters?: { language?: string; complexity?: string }):Promise<any> {
-        const query = this.createQueryBuilder("submission")
-        .where("submission.userId = :userId", { userId })
-        if(filters?.language) {
-            query.andWhere("submission.language = :language", { language:filters.language})
-        }
-        if(filters?.complexity) {
-            query.andWhere("submission.complexity = :complexity", {complexity: filters.complexity})
-        }
-        query.orderBy("createdAt")
-        query.limit(limit)
-        query.offset(offset)
-        const [result, count] = await query.getManyAndCount();
-        return {result, count};
+    // Repository Layer
+async findAllByUser( userId: string, limit: number, offset: number, filters?: { language?: string; complexity?: string }): Promise<{ results: any[], total: number }> {
+    const query = this.createQueryBuilder("submission")
+        .where("submission.userId = :userId", { userId });
+
+    if (filters?.language) {
+        query.andWhere("submission.language = :language", { language: filters.language });
     }
+    if (filters?.complexity) {
+        query.andWhere("submission.detectedComplexity = :complexity", { complexity: filters.complexity });
+    }
+
+    query.orderBy("submission.createdAt", "DESC") // Newest first
+         .skip(offset)
+         .take(limit);
+
+    const [results, total] = await query.getManyAndCount();
+    return { results, total };
+}
 });

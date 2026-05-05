@@ -54,8 +54,40 @@ export class SubmissionService {
 
         return result;
     }
-
-    async getAllSubmissions(userId: string,limit: number,offset: number, filters?: { language?: string; complexity?: string }): Promise<any> {
-        return this.subRepo.getAllSubmissions(userId,limit,offset,filters);
+    async list(userId: string, page: number, limit: number, filters?: { language?: string; complexity?: string }) {
+        const validatedPage = Math.max(1, page);
+        const validatedLimit = Math.min(50, Math.max(1, limit));
+        const offset = (validatedPage - 1) * validatedLimit;
+        const { results, total } = await this.subRepo.findAllByUser(userId, validatedLimit, offset, filters);
+        const totalPages = Math.ceil(total / validatedLimit);
+        return {
+            success: true,
+            data: results,
+            total,
+            page: validatedPage,
+            totalPages,
+            message: "Submission history retrieved successfully"
+        };
     }
+
+    async getAIReview(userId: string, submissionId: any) {
+    // 1. Verify submission exists and belongs to the user
+    const submission = await this.subRepo.findOne({ 
+        where: { id: submissionId} 
+    });
+
+    if (!submission) {
+        throw new Error("Submission not found or unauthorized");
+    }
+
+    // 2. Return structured placeholder
+    // This structure remains the same when real AI is added in Phase 4
+    return {
+        submissionId: submission.id,
+        review: "AI review coming in Phase 4", // Grounded review will go here
+        suggestedFix: null, // Refactored code snippet will go here
+        status: "placeholder",
+        generatedAt: new Date()
+    };
+}
 }

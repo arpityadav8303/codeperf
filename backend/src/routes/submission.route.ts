@@ -13,6 +13,8 @@ router.post("/",
     (req, res) => submissionController.createSubmission(req, res)
 );
 
+router.get("/:id/review",  authenticate,(req,res,next)=>submissionController.getSubmissionReview(req,res,next));
+
 // Get basic submission details
 router.get("/:id", 
     authenticate, 
