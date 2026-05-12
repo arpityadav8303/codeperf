@@ -12,9 +12,13 @@ export class SubmissionService {
 
     async processSubmission(code: string, language: string, userId: string): Promise<any> {
         // 1. Save the submission (defaults to 'queued')
+        const detectedComplexity = "O(n)"; // Example: Analysis result
+         const confidenceScore = 0.85;
         const initialSubmission = await this.subRepo.save({
             code: code,
             language: language,
+            detectedComplexity:detectedComplexity,
+            confidence:confidenceScore,
             user: { id: userId }
         } as Submission);
 
@@ -54,17 +58,15 @@ export class SubmissionService {
 
         return result;
     }
-    async list(userId: string, page: number, limit: number, filters?: { language?: string; complexity?: string }) {
-        const validatedPage = Math.max(1, page);
-        const validatedLimit = Math.min(50, Math.max(1, limit));
-        const offset = (validatedPage - 1) * validatedLimit;
-        const { results, total } = await this.subRepo.findAllByUser(userId, validatedLimit, offset, filters);
-        const totalPages = Math.ceil(total / validatedLimit);
+    async list(userId: string,limit: number,offset:number, filters?: { language?: string; complexity?: string }) {
+        const { results, total } = await this.subRepo.findAllByUser(userId,limit,offset,filters);
+        console.log(limit,'=====limit');
+        const totalPages = Math.ceil(total / limit);
         return {
             success: true,
             data: results,
             total,
-            page: validatedPage,
+            offset,
             totalPages,
             message: "Submission history retrieved successfully"
         };

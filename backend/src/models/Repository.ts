@@ -3,7 +3,7 @@ import { User } from "./User";
 
 @Entity("repositories")
 @Index(["githubRepoId", "user"], { unique: true })
-export class Repository {
+export class GitRepository {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 

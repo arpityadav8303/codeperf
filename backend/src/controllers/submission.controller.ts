@@ -73,7 +73,7 @@ export class Submission {
     async getAllSubmissionsOfUser(req: Request, res: Response): Promise<any> {
         try {
             const limit = parseInt(req.query.limit as string) || 10;
-            const page = parseInt(req.query.page as string) || 1;
+            const page = parseInt(req.query.page as string);
             const offset = (page - 1) * limit;
             const filters = {
                 language: req.query.language as string,

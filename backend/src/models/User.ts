@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany, Index } from "typeorm";
 import { Submission } from "./Submission";
-import { Repository } from "./Repository";
+import { GitRepository } from "./Repository";
 
 @Entity("users")
 export class User {
@@ -33,6 +33,6 @@ export class User {
     @OneToMany(() => Submission, (submission: Submission) => submission.user)
     submissions!: Submission[];
 
-    @OneToMany(() => Repository, (repo: Repository) => repo.user)
-    repositories!: Repository[];
+    @OneToMany(() => GitRepository, (repo: GitRepository) => repo.user)
+    repositories!: GitRepository[];
 }
