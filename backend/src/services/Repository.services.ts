@@ -1,5 +1,5 @@
 import { GitRepos } from "../repositiory/GitRepository.repo";
-import { SelectQueryBuilder } from "typeorm";
+import { SelectQueryBuilder, Brackets } from "typeorm";
 
 type JoinMethod = 'leftJoinAndSelect' | 'innerJoinAndSelect' | 'leftJoin' | 'innerJoin';
 
@@ -20,6 +20,12 @@ type relations = {
     JoinType?: string;
     condition?: string
 };
+
+type Search = {
+    name: string;
+    op: string;
+    value: string;
+}
 import crypto from 'crypto'
 export class repositioryService {
     constructor(
@@ -27,21 +33,27 @@ export class repositioryService {
     ) { }
 
     async connect(userId: string, dto: any): Promise<any> {
-        const existing = await this.gitrepo.findOne(dto.githubRepoId)
+        const existing = await this.gitrepo.findOne({
+            where: {
+                githubRepoId: dto.githubRepoId,
+                user: { id: userId }
+            }
+        });
         if (existing) {
             throw new Error("Repository is already connected to an account.");
         }
-        const secret = crypto.randomBytes(32).toString('hex');
+        const webhookSecret = crypto.randomBytes(32).toString('hex');
         const newRepo = this.gitrepo.create({
             ...dto,
-            secret
+            webhookSecret,
+            user: { id: userId }
         })
 
         return await this.gitrepo.save(newRepo);
 
     }
 
-    async list( limit: number, offset: number, select: string[] = [], whereCondition: WhereCondition[] = [], relations: relations[] = [], sort: SortCondition[] = [] ): Promise<any> {
+    async list(limit: number, offset: number, select: string[] = [], whereCondition: WhereCondition[] = [], relations: relations[] = [], sort: SortCondition[] = [], search: Search[] = []): Promise<any> {
         const query = this.gitrepo.createQueryBuilder("repository");
 
         if (select.length > 0) {
@@ -60,7 +72,7 @@ export class repositioryService {
         }
 
         if (whereCondition.length > 0) {
-            whereCondition.forEach((cond, index) => { 
+            whereCondition.forEach((cond, index) => {
                 const paramName = `p${index}`;
                 const field = cond.name.includes('.') ? cond.name : `repository.${cond.name}`;
 
@@ -90,6 +102,42 @@ export class repositioryService {
             sort.forEach(s => {
                 const field = s.field.includes('.') ? s.field : `repository.${s.field}`;
                 query.addOrderBy(field, s.direction);
+            });
+        }
+
+        if (search) {
+            const likeConditions = search.filter(item => item.op === 'like');
+            if (likeConditions.length > 0) {
+                query.andWhere(
+                    new Brackets((qb) => {
+                        likeConditions.forEach((item, idx) => {
+                            const { name, value } = item;
+                            const column = `repositiory.${name}`;
+                            const paramKey = `${name}_like_${idx}`;
+                            const clause = `${column} LIKE :${paramKey}`;
+                            if (idx === 0) {
+                                qb.where(clause, { [paramKey]: `%${value}%` });
+                            } else {
+                                qb.orWhere(clause, { [paramKey]: `%${value}%` });
+                            }
+
+                        });
+
+                    })
+                );
+            }
+            likeConditions.forEach((item) => {
+                const { name, value } = item;
+                const column = name.includes('.') ? name : `repository.${name}`;
+
+                // We use addOrderBy to prioritize these relevance rules before any user-defined sorts
+                query.addOrderBy(`
+                CASE 
+                    WHEN ${column} LIKE '${value}%' THEN 1 
+                    WHEN ${column} LIKE '%${value}%' THEN 2 
+                    ELSE 3 
+                END
+            `, 'ASC');
             });
         }
 
