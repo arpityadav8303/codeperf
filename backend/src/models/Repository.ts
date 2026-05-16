@@ -23,6 +23,9 @@ export class GitRepository {
     @Column("float", { default: 2.0 })
     regressionThresholdX!: number;
 
+    @Column({default: true})
+    isActive!: boolean;
+
     @CreateDateColumn()
     createdAt!: Date;
 

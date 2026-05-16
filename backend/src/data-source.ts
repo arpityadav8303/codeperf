@@ -6,6 +6,7 @@ import { GitRepository } from "./models/Repository";
 import { Submission } from "./models/Submission";
 import { Benchmark } from "./models/Benchmark";
 import { AlgorithmPattern } from "./models/AlgorithmPattern";
+import { AddIsActiveToRepositories1715800000000 } from "./migration";
 
 dotenv.config()
 export const AppDataSource = new DataSource({
@@ -19,5 +20,5 @@ export const AppDataSource = new DataSource({
     logging: true,     // Log SQL queries to console
     entities: [User, GitRepository, Submission, Benchmark, AlgorithmPattern],
     subscribers: [],
-    migrations: [],
+    migrations: [AddIsActiveToRepositories1715800000000],
 });

@@ -32,6 +32,10 @@ export class repositioryService {
         private gitrepo = GitRepos,
     ) { }
 
+    public async findOne(param: any): Promise<any> {
+        return this.gitrepo.findOne(param)
+    }
+
     async connect(userId: string, dto: any): Promise<any> {
         const existing = await this.gitrepo.findOne({
             where: {
@@ -157,5 +161,17 @@ export class repositioryService {
                 currentPage: Math.floor(offset / limit) + 1
             }
         };
+    }
+
+    public async verifyOwnership(repoId: any, userId: any): Promise<any> {
+        return await this.gitrepo.findOne({where: {githubRepoId: repoId,user: {id: userId}}})
+    }
+
+    public async updateData(repoId: any, userId: any, dto: any): Promise<any> {
+        return this.gitrepo.update({user: {id: userId}, githubRepoId: repoId },{blockOnRegression: dto.blockOnRegression, regressionThresholdX: dto.regressionThresholdX})
+    }
+
+    public async updateDataStatus(repoId: any, userId: any, status: boolean): Promise<any> {
+        return this.gitrepo.update({user:{id: userId},githubRepoId: repoId}, {isActive: status})
     }
 }
