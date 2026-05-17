@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { repositioryService, WhereCondition } from "../services/Repository.services"
-import { success, z } from "zod";
+import { z } from "zod";
 
 const updateConfigSchema = z.object({
     blockOnRegression: z.boolean({
@@ -12,6 +12,27 @@ const updateConfigSchema = z.object({
 }).refine(data => data.blockOnRegression !== undefined || data.regressionThresholdX !== undefined, {
     message: "At least one configuration field (blockOnRegression or regressionThresholdX) must be provided",
 });
+
+const updatedStatusSchema = z.object({
+   isActive: z.preprocess((val: any) => {
+        if (typeof val === 'object' && val !== null && 'status' in val) {
+            val = val.status;
+        }
+
+        if (val === true || val === "true" || val === 1 || val === "1") {
+            return true;
+        }
+        
+        if (val === 0 || val === "0") {
+            return false;
+        }
+
+        return val;
+    }, z.boolean({
+        message: "isActive must be 1 to activate or 0 to deactivate"
+    }))
+})
+
 export class RepoController {
     constructor(
         private repoService = new repositioryService
@@ -22,8 +43,8 @@ export class RepoController {
         if (!id) {
             return res.status(401).json({ message: "Unauthorized" });
         }
-        const select = ["githubRepoId", "fullName", "blockOnRegression", "regressionThresholdX", "createdAt"];
-        const whereCondition: WhereCondition[] = [{ name: "userId", op: "is", value: id }];
+        const select = ["githubRepoId", "fullName", "blockOnRegression", "regressionThresholdX", "createdAt", "isActive"];
+        const whereCondition: WhereCondition[] = [{ name: "userId", op: "is", value: id }, {name: "isActive", op: "is", value: "1"}];
         const data = await this.repoService.list(10, 0, select, whereCondition, [], [], []);
         return res.status(200).json(data);
     }
@@ -92,9 +113,19 @@ export class RepoController {
 
     public async updateRepoStatus(req: Request, res: Response): Promise<any> {
         try {
-           const githubRepoId = req.params.id;   // From URL parameter /:id/update-status
-            const authUserId = req.user.id;       // From authenticate middleware
-            const  isActive  = req.body; 
+            const validationResult = updatedStatusSchema.safeParse(req.body);
+
+            if (!validationResult.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    errors: validationResult.error.issues.map(issue => issue.message)
+                });
+            }
+            
+            const { isActive } = validationResult.data;
+            const githubRepoId = req.params.id;
+            const authUserId = req.user.id;
             const updatedStatus = await this.repoService.updateDataStatus(githubRepoId, authUserId, isActive);
 
             if (updatedStatus && updatedStatus.affected === 0) {
@@ -108,8 +139,7 @@ export class RepoController {
                 message: "Repo status updated successfully",
                 data: {
                     githubRepoId,
-                    isActive,
-                    //isActive: updatedStatus.isActive
+                    isActive
                 }
             });
         } catch (error: any) {

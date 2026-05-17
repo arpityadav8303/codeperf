@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index, CreateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Index, CreateDateColumn, OneToMany } from "typeorm";
 import { User } from "./User";
-
+import { Submission } from "./Submission";
 @Entity("repositories")
 @Index(["githubRepoId", "user"], { unique: true })
 export class GitRepository {
@@ -23,7 +23,7 @@ export class GitRepository {
     @Column("float", { default: 2.0 })
     regressionThresholdX!: number;
 
-    @Column({default: true})
+    @Column({ default: true })
     isActive!: boolean;
 
     @CreateDateColumn()
@@ -35,4 +35,7 @@ export class GitRepository {
     })
     @JoinColumn({ name: "userId" })
     user!: User;
+
+    @OneToMany(() => Submission, (submission) => submission.repository)
+    submissions!: Submission[];
 }
