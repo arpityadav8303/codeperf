@@ -7,7 +7,7 @@ const router = Router();
 
 // Create a new submission
 router.get("/allSubmissions", authenticate, (req,res)=> submissionController.getAllSubmissionsOfUser(req,res))
-router.post("/", 
+router.post("/create-submission", 
     authenticate, 
     rateLimiter.limit({ limit: 5, windowSeconds: 60 }), 
     (req, res) => submissionController.createSubmission(req, res)

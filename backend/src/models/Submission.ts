@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, Repository } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { User } from "./User";
 import { Benchmark } from "./Benchmark";
 import { GitRepository } from "./Repository";
@@ -30,9 +30,11 @@ export class Submission {
 
     @OneToMany(() => Benchmark, (result: Benchmark) => result.submission)
     benchmarks!: Benchmark[];
+
     @ManyToOne(() => GitRepository, (repo) => repo.submissions, {
-        nullable: true, // Set to true if you still want standalone code submissions
+        nullable: true,
         onDelete: "CASCADE"
     })
-    repository!: GitRepository;
+    @JoinColumn({ name: "repositoryId" })
+    repository!: GitRepository | null;
 }

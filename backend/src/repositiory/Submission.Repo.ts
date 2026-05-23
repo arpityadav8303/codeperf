@@ -1,5 +1,6 @@
 import { AppDataSource } from "../data-source";
 import { Submission } from "../models/Submission";
+import { Benchmark } from "../models/Benchmark";
 
 export const SubmissionRepository = AppDataSource.getRepository(Submission).extend({
     // Repository Layer
@@ -66,25 +67,21 @@ export const SubmissionRepository = AppDataSource.getRepository(Submission).exte
             .orderBy("submission.createdAt", "DESC")
             .getRawMany();
     },
-      /**
-       * Fetches the 5 most recent submissions for each user along with 
-       * their detected asymptotic time complexity.
-      */
+    /**
+     * Fetches the 5 most recent submissions for each user along with 
+     * their detected asymptotic time complexity.
+    */
     async getTop5SubmissionsPerUser(): Promise<any[]> {
-        // 1. Construct the inner query that builds the chronological row sequence counter
         const subQuery = this.createQueryBuilder("sub")
             .select("sub.id", "id")
             .addSelect("sub.userId", "userId")
             .addSelect("sub.language", "language")
             .addSelect("sub.detectedComplexity", "detectedComplexity")
             .addSelect("sub.createdAt", "createdAt")
-            // Partitions by user boundaries, matching the newest item with sequence 1
             .addSelect(
                 "ROW_NUMBER() OVER(PARTITION BY sub.userId ORDER BY sub.createdAt DESC)",
                 "row_num"
             );
-
-        // 2. Wrap it inside a main data-source query to execute the upper limit row filtering
         const results = await this.manager.connection
             .createQueryBuilder()
             .select("ranked.*")
@@ -94,5 +91,52 @@ export const SubmissionRepository = AppDataSource.getRepository(Submission).exte
             .getRawMany();
 
         return results;
+    },
+
+    async createWithBenchmarksAtomic( submissionData: Partial<Submission>, inputSizes: number[] ): Promise<Submission> {
+        // Create an isolated query runner to manage the transaction lifecycle
+        const queryRunner = AppDataSource.createQueryRunner();
+
+        // Establish connection and start transaction (BEGIN)
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            // Insert initial submission (implicitly defaults to 'queued')
+            const submissionInstance = queryRunner.manager.create(Submission, {
+                ...submissionData,
+                status: "queued"
+            });
+            const savedSubmission = await queryRunner.manager.save(submissionInstance);
+
+            // Generate mock benchmark datasets mapping back to the saved submission
+            const mockBenchmarks = inputSizes.map((size) => {
+                return queryRunner.manager.create(Benchmark, {
+                    submission: savedSubmission,
+                    inputSize: size,
+                    executionTimeMs: Number((Math.random() * (size / 100) + 1).toFixed(2)),
+                    memoryUsedKb: Number((Math.random() * (size / 50) + 1024).toFixed(2))
+                } as Benchmark);
+            });
+
+            // Bulk insert benchmarks within the same transaction context
+            await queryRunner.manager.save(Benchmark, mockBenchmarks);
+
+            // Update the submission status directly within the transaction block
+            savedSubmission.status = "completed";
+            const finalSubmission = await queryRunner.manager.save(savedSubmission);
+
+            // Commit changes permanently to disk (COMMIT)
+            await queryRunner.commitTransaction();
+            return finalSubmission;
+
+        } catch (error) {
+            // Rollback EVERYTHING if any single step fails (ROLLBACK)
+            await queryRunner.rollbackTransaction();
+            throw error;
+        } finally {
+            // Always release connection back to connection pool
+            await queryRunner.release();
+        }
     }
 });

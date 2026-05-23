@@ -10,37 +10,25 @@ export class SubmissionService {
         private benchRepo = BenchmarkRepository,
     ) { }
 
-    async processSubmission(code: string, language: string, userId: string): Promise<any> {
-        // 1. Save the submission (defaults to 'queued')
-        const detectedComplexity = "O(n)"; // Example: Analysis result
-         const confidenceScore = 0.85;
-        const initialSubmission = await this.subRepo.save({
-            code: code,
-            language: language,
-            detectedComplexity:detectedComplexity,
-            confidence:confidenceScore,
-            user: { id: userId }
-        } as Submission);
+    async processSubmission(code: string, language: string, userId: string): Promise<Submission> {
+        const detectedComplexity = "O(n)";
+        const confidenceScore = 0.85;
 
-        // 2. Create and save mock benchmark results matching the Benchmark entity
-        // We use an array of increasing input sizes to simulate Big-O scaling
         const inputSizes = [10, 100, 1000, 10000, 50000, 100000];
 
-        const mockBenchmarks: Benchmark[] = inputSizes.map((size) => ({
-            submission: initialSubmission,
-            inputSize: size,
-            // Mocking execution time and memory to scale roughly with input size
-            executionTimeMs: Number((Math.random() * (size / 100) + 1).toFixed(2)),
-            memoryUsedKb: Number((Math.random() * (size / 50) + 1024).toFixed(2))
-        } as Benchmark));
+        const submissionPayload: Partial<Submission> = {
+            code,
+            language,
+            detectedComplexity,
+            confidence: confidenceScore,
+            user: { id: userId } as any
+        };
 
-        await this.benchRepo.save(mockBenchmarks);
+        const completedSubmission = await this.subRepo.createWithBenchmarksAtomic(
+            submissionPayload,
+            inputSizes
+        );
 
-        // 3. Update submission status to 'completed'
-        initialSubmission.status = 'completed';
-        const completedSubmission = await this.subRepo.save(initialSubmission);
-
-        // 4. Return the completed submission
         return completedSubmission;
     }
 
@@ -58,9 +46,9 @@ export class SubmissionService {
 
         return result;
     }
-    async list(userId: string,limit: number,offset:number, filters?: { language?: string; complexity?: string }) {
-        const { results, total } = await this.subRepo.findAllByUser(userId,limit,offset,filters);
-        console.log(limit,'=====limit');
+    async list(userId: string, limit: number, offset: number, filters?: { language?: string; complexity?: string }) {
+        const { results, total } = await this.subRepo.findAllByUser(userId, limit, offset, filters);
+        console.log(limit, '=====limit');
         const totalPages = Math.ceil(total / limit);
         return {
             success: true,
@@ -73,23 +61,23 @@ export class SubmissionService {
     }
 
     async getAIReview(userId: string, submissionId: any) {
-    // 1. Verify submission exists and belongs to the user
-    const submission = await this.subRepo.findOne({ 
-        where: { id: submissionId} 
-    });
+        // 1. Verify submission exists and belongs to the user
+        const submission = await this.subRepo.findOne({
+            where: { id: submissionId }
+        });
 
-    if (!submission) {
-        throw new Error("Submission not found or unauthorized");
+        if (!submission) {
+            throw new Error("Submission not found or unauthorized");
+        }
+
+        // 2. Return structured placeholder
+        // This structure remains the same when real AI is added in Phase 4
+        return {
+            submissionId: submission.id,
+            review: "AI review coming in Phase 4", // Grounded review will go here
+            suggestedFix: null, // Refactored code snippet will go here
+            status: "placeholder",
+            generatedAt: new Date()
+        };
     }
-
-    // 2. Return structured placeholder
-    // This structure remains the same when real AI is added in Phase 4
-    return {
-        submissionId: submission.id,
-        review: "AI review coming in Phase 4", // Grounded review will go here
-        suggestedFix: null, // Refactored code snippet will go here
-        status: "placeholder",
-        generatedAt: new Date()
-    };
-}
 }
