@@ -71,7 +71,7 @@ export const SubmissionRepository = AppDataSource.getRepository(Submission).exte
      * Fetches the 5 most recent submissions for each user along with 
      * their detected asymptotic time complexity.
     */
-    async getTop5SubmissionsPerUser(): Promise<any[]> {
+    async getTop5SubmissionsPerUser(userId: string): Promise<any[]> {
         const subQuery = this.createQueryBuilder("sub")
             .select("sub.id", "id")
             .addSelect("sub.userId", "userId")
@@ -88,6 +88,7 @@ export const SubmissionRepository = AppDataSource.getRepository(Submission).exte
             .from(`(${subQuery.getQuery()})`, "ranked")
             .setParameters(subQuery.getParameters())
             .where("ranked.row_num <= 5")
+            .andWhere("ranked.userId = :userId", { userId })
             .getRawMany();
 
         return results;
