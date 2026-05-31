@@ -3,34 +3,41 @@ import { BenchmarkRepository } from "../repositiory/Benchmark.Repo";
 import { Submission } from "../models/Submission";
 import { Benchmark } from "../models/Benchmark";
 import { AppDataSource } from "../data-source"
-import {redisClient} from '../config/redis.config'
+import { redisClient, redisConnectionOptions } from '../config/redis.config';
+import { Queue } from "bullmq";
 
 export class SubmissionService {
+    private analysisQueue = new Queue("analysis queue", {
+        connection: redisConnectionOptions
+    });
     constructor(
         private subRepo = SubmissionRepository,
         private benchRepo = BenchmarkRepository,
     ) { }
 
     async processSubmission(code: string, language: string, userId: string): Promise<Submission> {
-        const detectedComplexity = "O(n)";
-        const confidenceScore = 0.85;
-
-        const inputSizes = [10, 100, 1000, 10000, 50000, 100000];
-
-        const submissionPayload: Partial<Submission> = {
+        // 2. Save a lightweight entry in MySQL marked as 'queued'
+        const submissionInstance = this.subRepo.create({
             code,
             language,
-            detectedComplexity,
-            confidence: confidenceScore,
+            status: "queued",
             user: { id: userId } as any
-        };
+        });
+        const savedSubmission = await this.subRepo.save(submissionInstance);
 
-        const completedSubmission = await this.subRepo.createWithBenchmarksAtomic(
-            submissionPayload,
-            inputSizes
-        );
+        // 3. Kick off the background job asynchronously by adding it to Redis
+        await this.analysisQueue.add("analyzeManualSubmission", {
+            submissionId: savedSubmission.id,
+            code,
+            language,
+            userId
+        }, {
+            attempts: 3,
+            backoff: { type: "exponential", delay: 2000 }
+        });
 
-        return completedSubmission;
+        // 4. Return immediately to the controller so the API responds in <100ms
+        return savedSubmission;
     }
 
     async findById(id: any): Promise<any> {
@@ -65,7 +72,7 @@ export class SubmissionService {
 
         return submission;
     }
-    
+
     async findWithBenchmark(id: any): Promise<any> {
         const result = await AppDataSource
             .getRepository(Submission)

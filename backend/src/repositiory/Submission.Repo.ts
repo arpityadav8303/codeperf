@@ -94,6 +94,19 @@ export const SubmissionRepository = AppDataSource.getRepository(Submission).exte
         return results;
     },
 
+    async createLightweightShell(code: string, language: string, userId: string): Promise<Submission> {
+        const submissionInstance = this.create({
+            code,
+            language,
+            status: "queued",
+            detectedComplexity: null,
+            confidence: null,
+            user: { id: userId } as any
+        });
+
+        return await this.save(submissionInstance);
+    },
+
     async createWithBenchmarksAtomic( submissionData: Partial<Submission>, inputSizes: number[] ): Promise<Submission> {
         // Create an isolated query runner to manage the transaction lifecycle
         const queryRunner = AppDataSource.createQueryRunner();
