@@ -3,6 +3,7 @@ import { BenchmarkRepository } from "../repositiory/Benchmark.Repo";
 import { Submission } from "../models/Submission";
 import { Benchmark } from "../models/Benchmark";
 import { AppDataSource } from "../data-source"
+import {redisClient} from '../config/redis.config'
 
 export class SubmissionService {
     constructor(
@@ -33,9 +34,38 @@ export class SubmissionService {
     }
 
     async findById(id: any): Promise<any> {
-        return this.subRepo.findOneBy({ id });
-    }
+        // 1. Check Redis Cache
+        const cacheKey = `submission:${id}`;
+        try {
+            const cachedData = await redisClient.get(cacheKey);
+            if (cachedData) {
+                console.log(`[Cache Hit] Found data for key: ${cacheKey}`);
+                return JSON.parse(cachedData) as Submission;
+            }
+        } catch (redisError) {
+            // Defensive Logging: If Redis fails, don't crash the app; fallback to DB
+            console.error(`[Redis Error] Failed to get key ${cacheKey}:`, redisError);
+        }
 
+        // 2. Cache Miss — Query MySQL Database via Repository
+        console.log(`[Cache Miss] Querying database for key: ${cacheKey}`);
+        const submission = await this.subRepo.findOneBy({ id });
+
+        if (!submission) {
+            return null;
+        }
+
+        // 3. Store in Cache asynchronously with a 5-minute TTL (300 seconds)
+        try {
+            // 'EX' stands for Expire in seconds
+            await redisClient.set(cacheKey, JSON.stringify(submission), "EX", 300);
+        } catch (redisError) {
+            console.error(`[Redis Error] Failed to set key ${cacheKey}:`, redisError);
+        }
+
+        return submission;
+    }
+    
     async findWithBenchmark(id: any): Promise<any> {
         const result = await AppDataSource
             .getRepository(Submission)
