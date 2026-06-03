@@ -4,3 +4,4 @@ backend/dist
 dist
 /backend/src/migration
 src/migrations/1780000000000-AddRepositoryIdToSubmissions.ts
+readme.md

@@ -7,9 +7,7 @@ import { redisClient, redisConnectionOptions } from '../config/redis.config';
 import { Queue } from "bullmq";
 
 export class SubmissionService {
-    private analysisQueue = new Queue("analysis queue", {
-        connection: redisConnectionOptions
-    });
+    private analysisQueue = new Queue("analysis queue", { connection: redisConnectionOptions });
     constructor(
         private subRepo = SubmissionRepository,
         private benchRepo = BenchmarkRepository,

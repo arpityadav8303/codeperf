@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import { AppDataSource } from "./data-source";
 import { setupRoutes } from "./routes";
+import { webSocketSubscribers } from "./config/websocket.config"
 dotenv.config();
 const app = express();
 app.use(helmet());

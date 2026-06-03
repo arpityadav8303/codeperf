@@ -25,6 +25,6 @@ export const worker = new Worker("analysis queue", async (job: Job) => {
         console.error(`[Worker Error] Job ${job.id} failed:`, error);
         throw error; // Let BullMQ handle retries natively
     }
-}, { 
-    connection: redisConnectionOptions 
+}, {
+    connection: redisConnectionOptions
 });
