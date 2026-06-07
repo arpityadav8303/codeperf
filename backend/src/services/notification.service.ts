@@ -2,11 +2,12 @@
 import WebSocket from "ws";
 
 // 1. Type Definitions - WSMessage Discriminated Union
+
 export type WSMessage =
     | { type: "subscribed"; submissionId: string; message: string }
-    | { type: "progress"; submissionId: string; progress: number; status: string }
-    | { type: "completed"; submissionId: string; detectedComplexity: string; confidence: number }
-    | { type: "failed"; submissionId: string; error: string }
+    | { type: "progress"; submissionId: string; progress: number; status: string; message?: string }
+    | { type: "completed"; submissionId: string; detectedComplexity: string; confidence: number; progress?: number; status?: string }
+    | { type: "failed"; submissionId: string; error: string; status?: string }
     | { 
         type: "already_completed"; 
         submissionId: string; 

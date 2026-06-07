@@ -1,6 +1,7 @@
 import { AppDataSource } from "../../data-source";
 import { Submission } from "../../models/Submission";
 import { Benchmark } from "../../models/Benchmark";
+import { sendToSubscribers } from "../../services/notification.service";
 
 export class ManualAnalysisStrategy {
     private subRepo = AppDataSource.getRepository(Submission);
@@ -10,6 +11,12 @@ export class ManualAnalysisStrategy {
 
         // 1. Update status to running
         await this.subRepo.update(submissionId, { status: "running" });
+        sendToSubscribers(submissionId, {
+            type: "progress",
+            submissionId,
+            progress: 10,
+            status: "running"
+        });
 
         // 2. Simulate analysis delay
         await new Promise((resolve) => setTimeout(resolve, 4000));
@@ -42,9 +49,21 @@ export class ManualAnalysisStrategy {
             });
 
             await queryRunner.commitTransaction();
+            // After commitTransaction():
+            sendToSubscribers(submissionId, {
+                type: "completed",
+                submissionId,
+                detectedComplexity,
+                confidence: confidenceScore
+            });
         } catch (error) {
             await queryRunner.rollbackTransaction();
             await this.subRepo.update(submissionId, { status: "failed" });
+            sendToSubscribers(submissionId, {
+                type: "failed",
+                submissionId,
+                error: "Analysis failed"
+            });
             throw error;
         } finally {
             await queryRunner.release();
