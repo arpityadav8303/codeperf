@@ -9,7 +9,20 @@ import { setupWebSocket } from './config/webSocket.setup';
 dotenv.config();
 const app = express();
 app.use(helmet());
-app.use(express.json());
+// app.use(express.json());
+app.use(helmet());
+
+// Configure express.json to capture the unparsed raw string specifically for GitHub signatures
+app.use(
+    express.json({
+        verify: (req: any, res, buf) => {
+            // Only capture raw body for incoming GitHub webhook requests
+            if (req.originalUrl.includes('/api/v1/webhooks/github')) {
+                req.rawBody = buf.toString('utf-8');
+            }
+        }
+    })
+);
 setupRoutes(app);
 
 
