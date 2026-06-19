@@ -6,11 +6,19 @@ import { AppDataSource } from "./data-source";
 import { setupRoutes } from "./routes";
 import { webSocketSubscribers } from "./config/websocket.config"
 import { setupWebSocket } from './config/webSocket.setup';
+import cors from 'cors';
 dotenv.config();
 const app = express();
 app.use(helmet());
 // app.use(express.json());
 app.use(helmet());
+const corsOptions = {
+    origin: ['http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true 
+};
+
+app.use(cors(corsOptions));
 
 // Configure express.json to capture the unparsed raw string specifically for GitHub signatures
 app.use(

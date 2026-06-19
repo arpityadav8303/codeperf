@@ -9,7 +9,7 @@ export function setupRoutes(app: Express) {
     // STEP 1: Webhook raw body capture — express.json() se PEHLE
     // Kyunki express.json() stream consume kar leta hai,
     // webhook route ko raw Buffer chahiye HMAC verification ke liye
-    app.use("/api/v1/webhook", webhookRoutes);
+    app.use("/api/v1/webhooks", webhookRoutes);
 
     // STEP 2: Baaki sabhi routes ke liye JSON parsing
     // Webhook path skip ho jayega kyunki uska route already handle ho gaya upar
