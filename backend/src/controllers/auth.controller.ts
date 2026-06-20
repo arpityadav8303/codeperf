@@ -3,8 +3,7 @@ import { UserService } from "../services/auth.services";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth";
 import bcrypt from 'bcrypt';
 import { verifyRefreshToken } from "../utils/auth";
-import { getGithubAccessToken, getGithubUserProfile } from "../utils/github";
-import { success } from "zod";
+import { getGithubAccessToken, getGithubPrimaryEmail, getGithubUserProfile } from "../utils/github";
 export class UserAuth {
     constructor(private userService = new UserService()) { }
 
@@ -199,43 +198,58 @@ export class UserAuth {
     }
 
     async githubLogin(req: Request, res: Response) {
-        const rootURL = 'https://github.com/login/oauth/authorize';
-        const options = {
-            client_id: process.env.GITHUB_CLIENT_ID as string,
-            redirect_uri: process.env.GITHUB_REDIRECT_URI as string,
-            scope: 'read:user user:email',
-            state: 'some_random_string',
+        const clientId = process.env.GITHUB_CLIENT_ID;
+        const redirectUri = process.env.GITHUB_REDIRECT_URI;
+
+        if (!clientId || !redirectUri) {
+            return res.status(500).json({
+                success: false,
+                message: "GitHub OAuth is not configured on the server"
+            });
         }
+
+        const rootURL = "https://github.com/login/oauth/authorize";
+        const options = {
+            client_id: clientId,
+            redirect_uri: redirectUri,
+            scope: "read:user user:email",
+            state: "some_random_string",
+        };
         const queryString = new URLSearchParams(options).toString();
         return res.redirect(`${rootURL}?${queryString}`);
     }
-
     async githubCallback(req: Request, res: Response) {
         try {
             const { code } = req.query;
-            if (!code) {
+            if (!code || typeof code !== "string") {
                 return res.status(400).json({
-                    success: false, message: "Authorization code not provided"
+                    success: false,
+                    message: "Authorization code not provided"
                 });
             }
-            const accessToken = await getGithubAccessToken(code as string);
+
+            const accessToken = await getGithubAccessToken(code);
             const githubUser = await getGithubUserProfile(accessToken);
-            let user = await this.userService.findOrCreateGithubUser({
+            const email = githubUser.email || await getGithubPrimaryEmail(accessToken);
+
+            const user = await this.userService.findOrCreateGithubUser({
                 githubId: String(githubUser.id),
                 githubUsername: githubUser.login,
                 name: githubUser.name || githubUser.login,
-                email: githubUser.email,
+                email,
                 avatarUrl: githubUser.avatar_url
-            })
+            });
+
             const appAccessToken = generateAccessToken(user.id);
             const appRefreshToken = generateRefreshToken(user.id);
-            const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-            return res.redirect(`${FRONTEND_URL}/login-success?token=${appAccessToken}`);
-        } catch (error) {
+            const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+            return res.redirect(`${frontendUrl}/login-success?accessToken=${appAccessToken}&refreshToken=${appRefreshToken}`);
+        } catch (error: any) {
+            console.error("GitHub OAuth callback failed:", error?.message || error);
             return res.status(500).json({
                 success: false,
-                Message: "error"
-            })
+                message: "GitHub OAuth failed"
+            });
         }
     }
 }

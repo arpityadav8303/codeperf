@@ -1,19 +1,21 @@
-
 export interface UserEntity {
-    id: String;
-    email: String;
-    username: String;
+    id: string;
+    email: string | null;
+    name?: string | null;
+    username?: string | null;
 }
 
 export interface LoginRequest {
-    email: String;
-    password: String;
+    email: string;
+    password: string;
 }
 
 export interface AuthResponse {
-    success: Boolean;
-    token: String;
-    user: UserEntity;
+    success: boolean;
+    accessToken?: string;
+    refreshToken?: string;
+    data?: UserEntity;
+    message?: string;
 }
 
 export interface SignUpRequest {

@@ -6,6 +6,8 @@ import { AuthButton } from '../../shared/components/AuthButton';
 import { CodePerfLogo } from './component/CodePerfLogo';
 import { MockDashboard } from './component/MockDashboard';
 import { AuthService } from '../../features/auth/api/auth.api';
+import { tokenStorage } from '../../core/lib/tokenStorage';
+import { getGithubOAuthUrl } from '../../core/lib/apiConfig';
 import "../../styles/signup.css";
 
 export const SignUp: React.FC = () => {
@@ -81,8 +83,8 @@ export const SignUp: React.FC = () => {
       });
 
       if (response.success) {
-        if (response.token) {
-          localStorage.setItem("token", String(response.token));
+        if (response.accessToken && response.refreshToken) {
+          tokenStorage.setTokens(response.accessToken, response.refreshToken);
         }
         navigate("/dashboard");
       } else {
@@ -129,7 +131,7 @@ export const SignUp: React.FC = () => {
             </h1>
           </div>
 
-          <p className="text-[15px] text-slate-400 leading-relaxed max-w-[500px]">
+          <p className="text-[15px] text-slate-400 leading-relaxed max-w-125">
             CodePerf helps engineering teams catch algorithmic bottlenecks before they hit production.
           </p>
 
@@ -259,16 +261,16 @@ export const SignUp: React.FC = () => {
 
           <div className="w-full flex flex-col gap-4">
             <div className="relative flex items-center">
-              <div className="flex-grow border-t border-slate-800" />
-              <span className="flex-shrink mx-4 text-[10px] uppercase tracking-wider font-semibold text-slate-500">Or continue with</span>
-              <div className="flex-grow border-t border-slate-800" />
+              <div className="grow border-t border-slate-800" />
+              <span className="shrink mx-4 text-[10px] uppercase tracking-wider font-semibold text-slate-500">Or continue with</span>
+              <div className="grow border-t border-slate-800" />
             </div>
 
             <AuthButton
               type="button"
               variant="social"
               className="auth-btn-social"
-              onClick={() => window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/github`}
+              onClick={() => window.location.href = getGithubOAuthUrl()}
               disabled={isLoading}
             >
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
@@ -289,3 +291,4 @@ export const SignUp: React.FC = () => {
     </div>
   );
 };
+

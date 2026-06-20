@@ -1,13 +1,18 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, ShieldCheck, Sun } from "lucide-react";
 import { AuthInput } from '../../shared/components/AuthInput';
 import { AuthButton } from '../../shared/components/AuthButton';
 import { CodePerfLogo } from './component/CodePerfLogo';
 import { MockDashboard } from './component/MockDashboard';
+import { AuthService } from "../../features/auth/api/auth.api";
+import { tokenStorage } from "../../core/lib/tokenStorage";
+import { getGithubOAuthUrl } from "../../core/lib/apiConfig";
 import "../../styles/signup.css";
 
 export const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
+  const authService = AuthService.getInstance();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -43,15 +48,27 @@ export const LoginPage: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsLoading(true);
     setApiError(null);
-
-    window.setTimeout(() => {
+     try {
+      const response = await authService.login({
+        email: formData.email,
+        password: formData.password
+      })
+      if(response.success){
+        if (response.accessToken && response.refreshToken) {
+          tokenStorage.setTokens(response.accessToken, response.refreshToken);
+        }
+        navigate("/dashboard")
+      }
+     } catch (error: any) {
+      setApiError(error?.response?.data?.message || error?.message || "An unexpected error occurred.")
+     }finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -95,7 +112,7 @@ export const LoginPage: React.FC = () => {
             </h1>
           </div>
           
-          <p className="text-[15px] text-slate-400 leading-relaxed max-w-[500px]">
+          <p className="text-[15px] text-slate-400 leading-relaxed max-w-125">
             CodePerf helps engineering teams catch algorithmic bottlenecks before they hit production.
           </p>
 
@@ -163,7 +180,6 @@ export const LoginPage: React.FC = () => {
 
         <div className="auth-panel-card flex flex-col gap-6">
           <div className="flex flex-col gap-2 text-center">
-            {/* Branding Logo inside Card */}
             <div className="flex justify-center mb-1">
               <CodePerfLogo size={42} />
             </div>
@@ -225,18 +241,18 @@ export const LoginPage: React.FC = () => {
           {/* Social Auth Providers Layer */}
           <div className="w-full flex flex-col gap-4">
             <div className="relative flex items-center">
-              <div className="flex-grow border-t border-slate-800"></div>
-              <span className="flex-shrink mx-4 text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+              <div className="grow border-t border-slate-800"></div>
+              <span className="shrink mx-4 text-[10px] uppercase tracking-wider font-semibold text-slate-500">
                 Or continue with
               </span>
-              <div className="flex-grow border-t border-slate-800"></div>
+              <div className="grow border-t border-slate-800"></div>
             </div>
 
             <AuthButton 
               type="button" 
               variant="social" 
               className="auth-btn-social"
-              onClick={() => window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/github`}
+              onClick={() => window.location.href = getGithubOAuthUrl()}
               disabled={isLoading}
             >
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
