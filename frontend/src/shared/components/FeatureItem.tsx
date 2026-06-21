@@ -18,7 +18,7 @@ export const FeatureItem: React.FC<FeatureItemProps> = ({ title, description, ic
         <h4 className="text-sm font-semibold text-(--signup-text-h) mb-0.5">
           {title}
         </h4>
-        <p className="text-xs text-slate-400 leading-relaxed">
+        <p className="text-xs text-[#A6A6A6] leading-relaxed">
           {description}
         </p>
       </div>

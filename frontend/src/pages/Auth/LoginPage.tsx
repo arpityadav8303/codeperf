@@ -102,55 +102,55 @@ export const LoginPage: React.FC = () => {
         <div className="relative z-10 my-auto flex flex-col gap-6 text-left max-w-[85%] mt-12 mb-8">
           <div>
             <div className="profiler-badge mb-4">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#FF6C37]"></span>
               Algorithmic Complexity Profiler
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight text-white leading-tight">
               Detect. Analyze.<br />
               Prevent Performance<br />
-              <span className="gradient-text">Regressions.</span>
+              <span className="accent-text">Regressions.</span>
             </h1>
           </div>
           
-          <p className="text-[15px] text-slate-400 leading-relaxed max-w-125">
+          <p className="text-[15px] text-[#A6A6A6] leading-relaxed max-w-125">
             CodePerf helps engineering teams catch algorithmic bottlenecks before they hit production.
           </p>
 
           {/* Marketing Bullets */}
           <div className="grid grid-cols-3 gap-4 mt-4 w-full">
             <div className="flex items-start gap-3">
-              <div className="feature-badge-container feature-badge-blue">
+              <div className="feature-badge-container feature-badge-accent">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.952 11.952 0 01-7.618 3.0167L3 9v4c0 5.523 4.477 10 10 10s10-4.477 10-10V9l-1.382-.572z" />
                 </svg>
               </div>
               <div>
-                <h4 className="text-xs font-semibold text-slate-100 mb-0.5">PR Checks</h4>
-                <p className="text-[10px] text-slate-400 leading-tight">Block performance regressions</p>
+                <h4 className="text-xs font-semibold text-[#FFFFFF] mb-0.5">PR Checks</h4>
+                <p className="text-[10px] text-[#A6A6A6] leading-tight">Block performance regressions</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="feature-badge-container feature-badge-green">
+              <div className="feature-badge-container feature-badge-light">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                 </svg>
               </div>
               <div>
-                <h4 className="text-xs font-semibold text-slate-100 mb-0.5">Full Repo Scan</h4>
-                <p className="text-[10px] text-slate-400 leading-tight">Analyze entire codebase complexity</p>
+                <h4 className="text-xs font-semibold text-[#FFFFFF] mb-0.5">Full Repo Scan</h4>
+                <p className="text-[10px] text-[#A6A6A6] leading-tight">Analyze entire codebase complexity</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="feature-badge-container feature-badge-purple">
+              <div className="feature-badge-container feature-badge-muted">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
               <div>
-                <h4 className="text-xs font-semibold text-slate-100 mb-0.5">AI Insights</h4>
-                <p className="text-[10px] text-slate-400 leading-tight">Get smart suggestions to optimize</p>
+                <h4 className="text-xs font-semibold text-[#FFFFFF] mb-0.5">AI Insights</h4>
+                <p className="text-[10px] text-[#A6A6A6] leading-tight">Get smart suggestions to optimize</p>
               </div>
             </div>
           </div>
@@ -170,9 +170,9 @@ export const LoginPage: React.FC = () => {
           <button className="theme-toggle-btn" aria-label="Toggle Theme">
             <Sun size={18} />
           </button>
-          <div className="text-sm font-medium text-slate-400">
+          <div className="text-sm font-medium text-[#A6A6A6]">
             Don't have an account?{" "}
-            <Link to="/signup" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+            <Link to="/signup" className="font-semibold text-[#A6A6A6] hover:text-[#FF6C37] transition-colors">
               Sign up
             </Link>
           </div>
@@ -186,7 +186,7 @@ export const LoginPage: React.FC = () => {
             <h2 className="text-2xl font-bold tracking-tight text-white">
               Welcome back
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[#A6A6A6]">
               Sign in to your CodePerf account
             </p>
           </div>
@@ -225,7 +225,7 @@ export const LoginPage: React.FC = () => {
                 <a
                   href="#"
                   onClick={(e) => e.preventDefault()}
-                  className="text-xs text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+                  className="text-xs text-[#A6A6A6] hover:text-[#FF6C37] font-semibold transition-colors"
                 >
                   Forgot password?
                 </a>
@@ -241,11 +241,11 @@ export const LoginPage: React.FC = () => {
           {/* Social Auth Providers Layer */}
           <div className="w-full flex flex-col gap-4">
             <div className="relative flex items-center">
-              <div className="grow border-t border-slate-800"></div>
-              <span className="shrink mx-4 text-[10px] uppercase tracking-wider font-semibold text-slate-500">
+              <div className="grow border-t border-[#3A3A3A]"></div>
+              <span className="shrink mx-4 text-[10px] uppercase tracking-wider font-semibold text-[#8F8F8F]">
                 Or continue with
               </span>
-              <div className="grow border-t border-slate-800"></div>
+              <div className="grow border-t border-[#3A3A3A]"></div>
             </div>
 
             <AuthButton 
@@ -264,7 +264,7 @@ export const LoginPage: React.FC = () => {
 
           <div className="flex justify-center">
             <div className="security-badge">
-              <ShieldCheck size={14} className="text-emerald-500" />
+              <ShieldCheck size={14} className="text-[#FF6C37]" />
               <span>Enterprise grade security. Your data is safe with us.</span>
             </div>
           </div>

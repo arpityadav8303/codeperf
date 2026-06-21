@@ -31,7 +31,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
         
         <div className="relative w-full flex items-center">
           {/* Prefix Visual Vector Wrapper */}
-          <div className="absolute left-3.5 text-slate-500 pointer-events-none">
+          <div className="absolute left-3.5 text-[#8F8F8F] pointer-events-none">
             <Icon size={18} />
           </div>
 
@@ -48,7 +48,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer bg-transparent border-0 outline-none"
+              className="absolute right-3.5 text-[#8F8F8F] hover:text-[#A6A6A6] transition-colors cursor-pointer bg-transparent border-0 outline-none"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -56,7 +56,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
         </div>
 
         {error && (
-          <span className="text-xs text-red-400 font-medium mt-0.5">
+          <span className="text-xs text-[#FFB199] font-medium mt-0.5">
             {error}
           </span>
         )}
