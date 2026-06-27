@@ -1,19 +1,20 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { User, Mail, Lock, ShieldCheck, Sun } from "lucide-react";
 import { AuthInput } from '../../shared/components/AuthInput';
 import { AuthButton } from '../../shared/components/AuthButton';
 import { CodePerfLogo } from './component/CodePerfLogo';
 import { MockDashboard } from './component/MockDashboard';
-import { AuthService } from '../../features/auth/api/auth.api';
-import { tokenStorage } from '../../core/lib/tokenStorage';
+// import { AuthService } from '../../features/auth/api/auth.api';
+// import { tokenStorage } from '../../core/lib/tokenStorage';
 import { getGithubOAuthUrl } from '../../core/lib/apiConfig';
+import { useRegisterMutation } from "../../features/auth/hooks/useAuthMutation";
 import "../../styles/signup.css";
 
 export const SignUp: React.FC = () => {
-  const navigate = useNavigate();
-  const authService = AuthService.getInstance();
-
+  // const navigate = useNavigate();
+  // const authService = AuthService.getInstance();
+  const registerMutation = useRegisterMutation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,8 +22,8 @@ export const SignUp: React.FC = () => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [apiError, setApiError] = useState<string | null>(null);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -36,9 +37,9 @@ export const SignUp: React.FC = () => {
       });
     }
 
-    if (apiError) {
-      setApiError(null);
-    }
+    // if (apiError) {
+    //   setApiError(null);
+    // }
   };
 
   const validateForm = () => {
@@ -68,34 +69,41 @@ export const SignUp: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  //   event.preventDefault();
+  //   if (!validateForm()) return;
+
+  //   setIsLoading(true);
+  //   setApiError(null);
+
+  //   try {
+  //     const response = await authService.register({
+  //       name: formData.name,
+  //       email: formData.email,
+  //       password: formData.password,
+  //     });
+
+  //     if (response.success) {
+  //       if (response.accessToken && response.refreshToken) {
+  //         tokenStorage.setTokens(response.accessToken, response.refreshToken);
+  //       }
+  //       navigate("/dashboard");
+  //     } else {
+  //       setApiError("Registration encountered a problem. Please try again.");
+  //     }
+  //   } catch (error: any) {
+  //     setApiError(error?.response?.data?.message || error?.message || "An unexpected error occurred.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!validateForm()) return;
+    registerMutation.mutate(formData);
+  }
 
-    setIsLoading(true);
-    setApiError(null);
-
-    try {
-      const response = await authService.register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (response.success) {
-        if (response.accessToken && response.refreshToken) {
-          tokenStorage.setTokens(response.accessToken, response.refreshToken);
-        }
-        navigate("/dashboard");
-      } else {
-        setApiError("Registration encountered a problem. Please try again.");
-      }
-    } catch (error: any) {
-      setApiError(error?.response?.data?.message || error?.message || "An unexpected error occurred.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="signup-container antialiased">
@@ -200,7 +208,12 @@ export const SignUp: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {apiError && <div className="signup-alert-error">{apiError}</div>}
+            {/* {apiError && <div className="signup-alert-error">{apiError}</div>} */}
+            {registerMutation.isError && (
+              <div className="signup-alert-error">
+                {registerMutation.error?.message || "An unexpected error occurred."}
+              </div>
+            )}
 
             <AuthInput
               label="Full name"
@@ -211,7 +224,7 @@ export const SignUp: React.FC = () => {
               value={formData.name}
               onChange={handleChange}
               error={errors.name}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               required
             />
 
@@ -224,7 +237,7 @@ export const SignUp: React.FC = () => {
               value={formData.email}
               onChange={handleChange}
               error={errors.email}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               required
             />
 
@@ -237,7 +250,7 @@ export const SignUp: React.FC = () => {
               value={formData.password}
               onChange={handleChange}
               error={errors.password}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               required
             />
 
@@ -250,11 +263,11 @@ export const SignUp: React.FC = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               error={errors.confirmPassword}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
               required
             />
 
-            <AuthButton type="submit" isLoading={isLoading} className="auth-btn-submit mt-2">
+            <AuthButton type="submit" isLoading={registerMutation.isPending} className="auth-btn-submit mt-2">
               Create developer account
             </AuthButton>
           </form>
@@ -271,7 +284,7 @@ export const SignUp: React.FC = () => {
               variant="social"
               className="auth-btn-social"
               onClick={() => window.location.href = getGithubOAuthUrl()}
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
             >
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
