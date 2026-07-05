@@ -17,3 +17,7 @@ export const verifyAccessToken = (token: string): string | jwt.JwtPayload => {
 export const verifyRefreshToken = (token: string): string | jwt.JwtPayload => {
     return jwt.verify(token, process.env.REFRESH_TOKEN_SECRET as string);
 }
+
+export const generateOTP = ()=>{
+    return Math.floor(100000 + Math.random()*999999)
+}

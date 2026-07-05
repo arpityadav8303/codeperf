@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import { UserService } from "../services/auth.services";
 import { generateAccessToken, generateRefreshToken } from "../utils/auth";
 import bcrypt from 'bcrypt';
-import { verifyRefreshToken } from "../utils/auth";
+import { verifyRefreshToken, generateOTP } from "../utils/auth";
 import { getGithubAccessToken, getGithubPrimaryEmail, getGithubUserProfile } from "../utils/github";
+import { sendMail } from "../utils/mailSender";
 export class UserAuth {
     constructor(private userService = new UserService()) { }
 
@@ -252,6 +253,117 @@ export class UserAuth {
             });
         }
     }
+
+    async sendOtp(req: Request, res: Response): Promise<any> {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Email required"
+                })
+            }
+            const user = await this.userService.findOne({ where: { email } });
+            if (!user) {
+                return res.status(400).json({
+                    success: false,
+                    message: "User not found"
+                })
+            }
+            const otp = generateOTP();
+            const saltRounds = 10;
+            const hashedOTP = await bcrypt.hash(String(otp), saltRounds);
+            const saveRedis = await this.userService.otpSave(email, hashedOTP);
+            if (!saveRedis) {
+                return res.status(500).json({
+                    success: false,
+                    message: "Internal Server Error"
+                })
+            }
+            const html = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9;">
+        <h2 style="color: #333;">OTP Verification</h2>
+        <p>Hello,</p>
+        <p>Your One-Time Password (OTP) is:</p>
+        <h1 style="color: #2e86de; letter-spacing: 2px;">${otp}</h1>
+        <p>This code will expire in <strong>5 minutes</strong>. Please do not share it with anyone.</p>
+        <hr />
+        <p style="font-size: 12px; color: #777;">
+          If you did not request this, please ignore this email.
+        </p>
+      </div>
+    `
+            await sendMail(email, "Your Otp", html);
+            return res.status(200).json({
+                success: true,
+                message: "Otp send successfully on your registered email"
+            })
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: "error occured"
+            })
+        }
+    }
+
+    async verifyOtp(req: Request, res: Response): Promise<any> {
+        try {
+            const { otp, email } = req.body;
+            if (!otp || !email) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please provide otp and email"
+                });
+            }
+
+            const otpHashed = await this.userService.getOtp(email);
+            if (!otpHashed) {
+                return res.status(410).json({
+                    success: false,
+                    message: "Otp expired or not found"
+                });
+            }
+
+            const compare = await bcrypt.compare(otp, otpHashed);
+            if (!compare) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Otp not matched"
+                });
+            }
+
+            const user = await this.userService.findOne({
+                where: { email: email.toLowerCase().trim() },
+                select: ["id", "email", "isChangePass"]
+            });
+
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: "User not found"
+                });
+            }
+
+            if (!user.isChangePass) {
+                user.isChangePass = true;
+                await this.userService.update(user.id, user);
+            }
+            
+            return res.status(200).json({
+                success: true,
+                message: "Otp matched"
+            })
+
+        } catch (error: any) {
+            return res.status(error.status || 500).json({
+                success: false,
+                message: error.message || "Internal Server Error"
+            })
+        }
+    }
+
 }
 
 export const authController = new UserAuth();
+
+

@@ -12,5 +12,7 @@ router.post("/logout", authenticate, rateLimiter.limit({ limit: 5, windowSeconds
 router.post("/refresh", (req, res) => authController.refreshToken(req, res));
 router.get("/github", (req,res) => authController.githubLogin(req, res));
 router.get("/github/callback", (req, res) => authController.githubCallback(req, res));
+router.post("/send-otp",rateLimiter.limit({ limit: 5, windowSeconds: 60 }),(req,res)=>authController.sendOtp(req,res));
+router.post("/verify-otp",rateLimiter.limit({ limit: 5, windowSeconds: 60 }),(req,res)=>authController.verifyOtp(req,res));
 export default router;
 

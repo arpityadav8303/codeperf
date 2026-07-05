@@ -1,5 +1,6 @@
 import { UserRepository } from "../repositiory/auth.controller.repo";
 import { User } from "../models/User";
+import { redisClient, redisConnectionOptions } from "../config/redis.config";
 import bcrypt from 'bcrypt'
 export class UserService {
     constructor(private userRepo = UserRepository) { }
@@ -52,6 +53,14 @@ export class UserService {
     }
     async delete(id: string) {
         return await this.userRepo.delete(id);
+    }
+
+    async otpSave(email: string, otp: any): Promise<any> {
+        return await redisClient.set(email, otp, "EX", 300);
+    }
+
+    async getOtp(email: string){
+        return await redisClient.get(email);
     }
 
     async findOrCreateGithubUser(githubData: { githubId: string, name: string, email: string | null, avatarUrl: string, githubUsername: string }) {

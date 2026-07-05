@@ -1,14 +1,17 @@
 import React from "react";
 import { useMe } from "../../features/auth/hooks/useMe";
 import { tokenStorage } from "../../core/lib/tokenStorage";
+import { useAuthStore } from "../../features/auth/store/authStore";
 import { useNavigate } from "react-router-dom";
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useMe();
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
   const handleLogout = () => {
     tokenStorage.clearTokens();
+    clearAuth();  
     navigate("/login");
   };
 

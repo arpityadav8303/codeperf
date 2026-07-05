@@ -1,10 +1,12 @@
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { tokenStorage } from "../../core/lib/tokenStorage";
+import { useAuthStore } from "../../features/auth/store/authStore";
 
 export const LoginSuccess: React.FC = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const setAuth = useAuthStore((state) => state.setAuth);
 
     useEffect(() => {
         const accessToken = searchParams.get("accessToken");
@@ -12,12 +14,13 @@ export const LoginSuccess: React.FC = () => {
 
         if (accessToken && refreshToken) {
             tokenStorage.setTokens(accessToken, refreshToken);
+            setAuth(accessToken);
             navigate("/dashboard", { replace: true });
         } else {
             tokenStorage.clearTokens();
             navigate("/login", { replace: true });
         }
-    }, [searchParams, navigate]);
+    }, [searchParams, navigate, setAuth]);
 
     return (
         <div style={{

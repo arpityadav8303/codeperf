@@ -27,6 +27,9 @@ export class User {
     @Column("varchar", { nullable: true })
     avatarUrl!: string | null;
 
+    @Column("boolean", { default: false })
+    isChangePass!: boolean;
+
     @CreateDateColumn()
     createdAt!: Date;
 
