@@ -14,5 +14,6 @@ router.get("/github", (req,res) => authController.githubLogin(req, res));
 router.get("/github/callback", (req, res) => authController.githubCallback(req, res));
 router.post("/send-otp",rateLimiter.limit({ limit: 5, windowSeconds: 60 }),(req,res)=>authController.sendOtp(req,res));
 router.post("/verify-otp",rateLimiter.limit({ limit: 5, windowSeconds: 60 }),(req,res)=>authController.verifyOtp(req,res));
+router.post("/reset-password",rateLimiter.limit({ limit: 5, windowSeconds: 60 }), (req,res)=>authController.forgotPassword(req,res))
 export default router;
 

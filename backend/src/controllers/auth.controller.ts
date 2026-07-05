@@ -5,6 +5,9 @@ import bcrypt from 'bcrypt';
 import { verifyRefreshToken, generateOTP } from "../utils/auth";
 import { getGithubAccessToken, getGithubPrimaryEmail, getGithubUserProfile } from "../utils/github";
 import { sendMail } from "../utils/mailSender";
+import { redisClient } from "../config/redis.config";
+import { randomBytes } from "crypto";
+
 export class UserAuth {
     constructor(private userService = new UserService()) { }
 
@@ -315,7 +318,6 @@ export class UserAuth {
                     message: "Please provide otp and email"
                 });
             }
-
             const otpHashed = await this.userService.getOtp(email);
             if (!otpHashed) {
                 return res.status(410).json({
@@ -323,7 +325,6 @@ export class UserAuth {
                     message: "Otp expired or not found"
                 });
             }
-
             const compare = await bcrypt.compare(otp, otpHashed);
             if (!compare) {
                 return res.status(400).json({
@@ -332,9 +333,10 @@ export class UserAuth {
                 });
             }
 
+            const normalizedEmail = email.toLowerCase().trim();
             const user = await this.userService.findOne({
-                where: { email: email.toLowerCase().trim() },
-                select: ["id", "email", "isChangePass"]
+                where: { email: normalizedEmail },
+                select: ["id", "email"]
             });
 
             if (!user) {
@@ -343,22 +345,59 @@ export class UserAuth {
                     message: "User not found"
                 });
             }
+            const resetToken = randomBytes(32).toString("hex");
+            await redisClient.set(`reset:${resetToken}`, normalizedEmail, "EX", 300);
 
-            if (!user.isChangePass) {
-                user.isChangePass = true;
-                await this.userService.update(user.id, user);
-            }
-            
             return res.status(200).json({
                 success: true,
+                data: resetToken,
                 message: "Otp matched"
-            })
+            });
 
         } catch (error: any) {
             return res.status(error.status || 500).json({
                 success: false,
                 message: error.message || "Internal Server Error"
-            })
+            });
+        }
+    }
+
+    async forgotPassword(req: Request, res: Response): Promise<any> {
+        try {
+            const { password, resetToken } = req.body;
+            if (!password || !resetToken) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Password and reset token are required"
+                });
+            }
+            const email = await redisClient.get(`reset:${resetToken}`);
+            if (!email) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Reset token expired or invalid. Please verify OTP first."
+                });
+            }
+            const userData = await this.userService.findOne({ where: { email: email } });
+            if (!userData) {
+                return res.status(404).json({
+                    success: false,
+                    message: "User account no longer exists"
+                });
+            }
+            userData.passwordHash = await bcrypt.hash(password, 10);
+            await this.userService.update(userData.id, userData);
+            await redisClient.del(`reset:${resetToken}`);
+            return res.status(200).json({
+                success: true,
+                message: "Password changed successfully"
+            });
+
+        } catch (error: any) {
+            return res.status(500).json({
+                success: false,
+                message: error.message || "Internal server error"
+            });
         }
     }
 

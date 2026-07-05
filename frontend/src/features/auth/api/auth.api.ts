@@ -1,5 +1,5 @@
 import { BaseService } from "../../../core/lib/apiClient";
-import type { LoginRequest, AuthResponse, SignUpRequest } from "../types/auth.types";
+import type { LoginRequest, AuthResponse, SignUpRequest, verifyOtp} from "../types/auth.types";
 export class AuthService extends BaseService {
     private static instance: AuthService;
 
@@ -24,5 +24,17 @@ export class AuthService extends BaseService {
 
     public async getMe(): Promise<any> {
         return this.get<any>("/auth/me");
+    }
+
+    public async sendOTP(credential:{email: string}): Promise<any> {
+        return this.post("/auth/send-otp", credential);
+    }
+
+    public async verifyOtp(credential: verifyOtp): Promise<any> {
+        return this.post("/auth/verify-otp", credential);
+    }
+
+    public async resetPassword(credential: {password: string, resetToken: string}): Promise<any> {
+        return this.post("/auth/reset-password", credential);
     }
 }

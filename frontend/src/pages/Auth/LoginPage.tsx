@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Mail, Lock, ShieldCheck, Sun } from "lucide-react";
 import { AuthInput } from '../../shared/components/AuthInput';
@@ -12,7 +13,7 @@ import { useLoginMutation } from "../../features/auth/hooks/useAuthMutation";
 import "../../styles/signup.css";
 
 export const LoginPage: React.FC = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   // const authService = AuthService.getInstance();
   const loginMutation = useLoginMutation();
   const [formData, setFormData] = useState({
@@ -232,14 +233,15 @@ export const LoginPage: React.FC = () => {
               disabled={loginMutation.isPending}
               labelRight={
                 <a
-                  href="#"
-                  onClick={(e) => e.preventDefault()}
-                  className="text-xs text-[#A6A6A6] hover:text-[#FF6C37] font-semibold transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate("/ResetPassword");
+                  }}
+                  className="text-xs text-[#A6A6A6] hover:text-[#FF6C37] font-semibold transition-colors cursor-pointer"
                 >
                   Forgot password?
                 </a>
               }
-              required
             />
 
             <AuthButton type="submit" isLoading={loginMutation.isPending} className="auth-btn-submit mt-2">
