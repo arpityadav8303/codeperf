@@ -24,6 +24,7 @@ export class SubmissionService {
         const savedSubmission = await this.subRepo.save(submissionInstance);
 
         // 3. Kick off the background job asynchronously by adding it to Redis
+        console.log('==========1');
         await this.analysisQueue.add("analyzeManualSubmission", {
             submissionId: savedSubmission.id,
             code,
@@ -33,7 +34,7 @@ export class SubmissionService {
             attempts: 3,
             backoff: { type: "exponential", delay: 2000 }
         });
-
+       console.log('==========3');
         // 4. Return immediately to the controller so the API responds in <100ms
         return savedSubmission;
     }

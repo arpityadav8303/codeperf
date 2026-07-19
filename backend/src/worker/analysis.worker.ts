@@ -12,9 +12,10 @@ export const worker = new Worker("analysis queue", async (job: Job) => {
 
     try {
         switch (job.name) {
+            
             case "analyzeManualSubmission":
                 return await manualAnalysis.execute(job.data);
-
+         
             case "analyzeGithubPR":
                 // In the future: return await githubPRAnalysis.execute(job.data);
                 console.log("[Worker] PR analysis coming up in Week 11");

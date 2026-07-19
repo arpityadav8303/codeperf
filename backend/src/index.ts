@@ -2,10 +2,12 @@ import 'reflect-metadata';
 import express from 'express';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import { AppDataSource } from "./data-source";
 import { setupRoutes } from "./routes";
-import { webSocketSubscribers } from "./config/websocket.config"
 import { setupWebSocket } from './config/webSocket.setup';
+import "./worker/analysis.worker";
 import cors from 'cors';
 dotenv.config();
 const app = express();
@@ -18,13 +20,32 @@ const corsOptions = {
     credentials: true 
 };
 
-app.use(cors(corsOptions));
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'CodePerf Backend API',
+      version: '1.0.0',
+      description: 'API documentation for CodePerf benchmark and performance analysis engine',
+    },
+    servers: [
+      {
+        url: 'http://localhost:8000',
+      },
+    ],
+  },
+  apis: [__dirname + '/routes/*.ts', __dirname + '/controllers/*.ts'],
+};
 
-// Configure express.json to capture the unparsed raw string specifically for GitHub signatures
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+app.use(cors(corsOptions));
+app.get('/api-docs/swagger.json', (_req, res) => res.json(swaggerSpec));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(
     express.json({
         verify: (req: any, res, buf) => {
-            // Only capture raw body for incoming GitHub webhook requests
             if (req.originalUrl.includes('/api/v1/webhooks/github')) {
                 req.rawBody = buf.toString('utf-8');
             }

@@ -47,7 +47,6 @@ export class ManualAnalysisStrategy {
                 detectedComplexity,
                 confidence: confidenceScore
             });
-
             await queryRunner.commitTransaction();
             // After commitTransaction():
             sendToSubscribers(submissionId, {

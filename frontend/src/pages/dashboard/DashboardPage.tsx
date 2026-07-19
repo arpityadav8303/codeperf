@@ -3,10 +3,12 @@ import { useMe } from "../../features/auth/hooks/useMe";
 import { tokenStorage } from "../../core/lib/tokenStorage";
 import { useAuthStore } from "../../features/auth/store/authStore";
 import { useNavigate } from "react-router-dom";
+import { NavBar } from "../../shared/components/NavBar";
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { data, isLoading, error } = useMe();
+  console.log(data,'data');
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   const handleLogout = () => {
@@ -44,6 +46,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#121212] text-white p-8">
+      <NavBar/>
       <div className="max-w-6xl mx-auto flex items-center justify-between border-b border-[#2A2A2A] pb-6 mb-8">
         <div className="text-left">
           <h1 className="text-2xl font-bold tracking-tight">CodePerf Dashboard</h1>
