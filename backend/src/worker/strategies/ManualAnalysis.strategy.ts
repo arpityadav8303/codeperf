@@ -6,8 +6,8 @@ import { sendToSubscribers } from "../../services/notification.service";
 export class ManualAnalysisStrategy {
     private subRepo = AppDataSource.getRepository(Submission);
 
-    async execute(data: { submissionId: string; code: string; language: string }): Promise<void> {
-        const { submissionId } = data;
+    async execute(data: { submissionId: string; code: string; language: string; inputSize?: number }): Promise<void> {
+        const { submissionId, inputSize } = data;
 
         // 1. Update status to running
         await this.subRepo.update(submissionId, { status: "running" });
@@ -24,7 +24,7 @@ export class ManualAnalysisStrategy {
         // 3. Mock metrics (Phase 3 will replace this with real C++ execution)
         const detectedComplexity = "O(n)";
         const confidenceScore = 0.85;
-        const inputSizes = [10, 100, 1000, 10000, 50000, 100000];
+        const inputSizes = [10, 100, 1_000, 10_000, 50_000, 100_000];
 
         const queryRunner = AppDataSource.createQueryRunner();
         await queryRunner.connect();

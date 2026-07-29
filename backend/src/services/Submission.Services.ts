@@ -13,7 +13,7 @@ export class SubmissionService {
         private benchRepo = BenchmarkRepository,
     ) { }
 
-    async processSubmission(code: string, language: string, userId: string): Promise<Submission> {
+    async processSubmission(code: string, language: string, userId: string, inputSize?: number): Promise<Submission> {
         // 2. Save a lightweight entry in MySQL marked as 'queued'
         const submissionInstance = this.subRepo.create({
             code,
@@ -29,6 +29,7 @@ export class SubmissionService {
             submissionId: savedSubmission.id,
             code,
             language,
+            inputSize,
             userId
         }, {
             attempts: 3,

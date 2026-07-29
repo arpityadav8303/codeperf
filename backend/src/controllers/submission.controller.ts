@@ -50,12 +50,12 @@ export class Submission {
 
     async createSubmission(req: Request, res: Response): Promise<any> {
         try {
-            const { code, language } = req.body;
+            const { code, language, inputSize } = req.body;
             if (!code || !language) {
                 return res.status(400).json({ message: "Code and language are required" });
             }
             const userId = req.user.id;
-            const result = await this.submissionService.processSubmission(code, language, userId);
+            const result = await this.submissionService.processSubmission(code, language, userId, inputSize);
             return res.status(200).json({
                 message: "Successfully created submission",
                 data: result,

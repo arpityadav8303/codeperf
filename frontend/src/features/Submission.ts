@@ -17,6 +17,7 @@ export class SubmissionService extends BaseService {
   public async createSubmission(data: {
     code: string;
     language: string;
+    inputSize: number;
   }) {
     return this.post("/submission/create-submission", data);
   }

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import submissionController from "../controllers/submission.controller";
+import submissionController from "../controllers/Submission.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { rateLimiter } from "../middlewares/rateLimiter.middleware";
 
@@ -12,7 +12,7 @@ router.get("/get-submission-review/:id",  authenticate,(req,res,next)=>submissio
 // Get basic submission details
 router.get("/get-submission-by-id/:id", authenticate, rateLimiter.limit({ limit: 10, windowSeconds: 60 }), (req, res) => submissionController.getSubmission(req, res));
 // Get submission WITH benchmark data (Specific Path)
-router.get("/get-Submission-With-Benchmark/:id", authenticate, rateLimiter.limit({ limit: 10, windowSeconds: 60 }), (req, res) => submissionController.getSubmissionWithBenchmark(req, res));
+router.get("/get-Submission-With-Benchmark/:id", authenticate, rateLimiter.limit({ limit: 100, windowSeconds: 60 }), (req, res) => submissionController.getSubmissionWithBenchmark(req, res));
 
 
 export default router;
