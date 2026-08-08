@@ -1,72 +1,44 @@
-class WebSocketService {
-  private socket: WebSocket | null = null;
-  private messageCallback: ((message: any) => void) | null = null;
-  private sendQueue: string[] = [];
+import { API_BASE_URL } from "./apiConfig";
 
-  connect() {
-    if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
-      return;
-    }
+export type SubmissionSocketMessage =
+  | { type: "connected"; message?: string }
+  | { type: "subscribed"; submissionId: string; message?: string }
+  | { type: "progress"; submissionId: string; progress: number; status?: string }
+  | { type: "completed" | "already_completed"; submissionId: string; detectedComplexity?: string | null; confidence?: number | null }
+  | { type: "failed"; submissionId: string; error?: string };
 
-    this.socket = new WebSocket("ws://localhost:8000/ws");
-
-    this.socket.onopen = () => {
-  console.log("⚡ WebSocket Connected");
-  
-  while (this.sendQueue.length > 0) {
-    const payload = this.sendQueue.shift();
-    if (payload) {
-      this.socket?.send(payload);
-    }
-  }
+const socketUrl = () => {
+  if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL;
+  const url = new URL(API_BASE_URL);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  url.pathname = "/ws";
+  url.search = "";
+  return url.toString();
 };
 
-    this.socket.onmessage = (event) => {
-      if (this.messageCallback) {
-        try {
-          const parsedData = JSON.parse(event.data);
-          this.messageCallback(parsedData);
-        } catch (err) {
-          console.error("Failed parsing incoming WS frame:", err);
-        }
-      }
-    };
+class WebSocketService {
+  private socket: WebSocket | null = null;
+  private onFrame: ((message: SubmissionSocketMessage) => void) | null = null;
+  private onStatus: ((connected: boolean) => void) | null = null;
+  private queue = new Set<string>();
 
-    this.socket.onclose = () => {
-      console.log("🔌 WebSocket Closed");
-    };
-
-    this.socket.onerror = (error) => {
-      console.error("❌ WebSocket Error:", error);
-    };
+  connect() {
+    const currentSocket = this.socket;
+    if (currentSocket && (currentSocket.readyState === WebSocket.OPEN || currentSocket.readyState === WebSocket.CONNECTING)) return;
+    this.socket = new WebSocket(socketUrl());
+    this.socket.onopen = () => { this.onStatus?.(true); for (const item of this.queue) this.socket?.send(item); this.queue.clear(); };
+    this.socket.onmessage = (event) => { try { this.onFrame?.(JSON.parse(event.data) as SubmissionSocketMessage); } catch { /* ignore invalid frames */ } };
+    this.socket.onclose = () => this.onStatus?.(false);
+    this.socket.onerror = () => this.onStatus?.(false);
   }
 
-  onMessage(callback: (message: any) => void) {
-    this.messageCallback = callback;
-  }
-
+  onMessage(callback: (message: SubmissionSocketMessage) => void) { this.onFrame = callback; }
+  onConnectionChange(callback: (connected: boolean) => void) { this.onStatus = callback; }
   subscribe(submissionId: string) {
-    const payload = JSON.stringify({
-      type: "subscribe",
-      submissionId,
-    });
-
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(payload);
-    } else {
-      console.log(`[WS] Connection buffering. Queuing subscription for: ${submissionId}`);
-      this.sendQueue.push(payload);
-    }
+    const payload = JSON.stringify({ type: "subscribe", submissionId });
+    if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(payload); else this.queue.add(payload);
   }
-
-  disconnect() {
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
-    }
-    this.messageCallback = null;
-    this.sendQueue = [];
-  }
+  disconnect() { this.socket?.close(); this.socket = null; this.onFrame = null; this.onStatus = null; this.queue.clear(); }
 }
 
 export default new WebSocketService();

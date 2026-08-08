@@ -28,3 +28,8 @@ export interface verifyOtp {
     otp: string
     email: string
 }
+
+export interface ChangePasswordPayload {
+  oldPassword: string;
+  newPassword: string;
+}

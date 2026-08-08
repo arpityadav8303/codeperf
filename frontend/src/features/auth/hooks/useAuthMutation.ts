@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthService } from "../api/auth.api";
 import { tokenStorage } from "../../../core/lib/tokenStorage";
 import { useAuthStore } from "../store/authStore";
-import type { LoginRequest, SignUpRequest, AuthResponse } from "../types/auth.types";
+import { type LoginRequest, type SignUpRequest, type AuthResponse , type ChangePasswordPayload} from "../types/auth.types";
 
 export const useLoginMutation = () => {
   const navigate = useNavigate();
@@ -40,5 +40,13 @@ export const useRegisterMutation = () => {
       }
       navigate("/dashboard");
     },
+  });
+};
+
+export const useChangePasswordMutation = () => {
+  const authService = AuthService.getInstance();
+
+  return useMutation<any, Error, ChangePasswordPayload>({
+    mutationFn: (credentials) => authService.changePassword(credentials),
   });
 };

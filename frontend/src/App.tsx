@@ -7,6 +7,8 @@ import { ResetPassword } from './pages/Auth/ForgotPassword';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MonacoEditorPage } from './pages/codeEditor/MonacoEditorPage';
+import { SubmissionResultPage } from './pages/codeEditor/SubmissionResultPage';
+import { ChangePassword } from './pages/Auth/ChangePassword';
 
 function App() {
   return (
@@ -16,6 +18,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/ResetPassword" element={<ResetPassword />} />
         <Route path="/login-success" element={<LoginSuccess />} />
+        <Route path='/changePassword' element = { <ProtectedRoute><ChangePassword/></ProtectedRoute>}/>
         <Route
           path="/dashboard"
           element={
@@ -29,6 +32,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MonacoEditorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/submissions/:id"
+          element={
+            <ProtectedRoute>
+              <SubmissionResultPage />
             </ProtectedRoute>
           }
         />
