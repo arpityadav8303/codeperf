@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { useNavigate } from "react-router-dom";
 import { NavBar } from "../../shared/components/NavBar";
+import { useMe } from "../../features/auth/hooks/useMe";
 import { SubmissionService } from "../../features/Submission";
 import websocket, { type SubmissionSocketMessage } from "../../core/lib/WebSocket";
 import "./MonacoEditor.css";
@@ -155,9 +156,12 @@ export const MonacoEditorPage = () => {
 
   const benchmark = result?.benchmarks?.find((item) => item.inputSize === sizes[inputSize]) ?? result?.benchmarks?.[0];
 
+  const { data } = useMe();
+  const username = (data?.data as { name?: string } | undefined)?.name || (data as { name?: string } | undefined)?.name || "Developer";
+
   return (
     <div className="editor-page">
-      <NavBar />
+      <NavBar username={username} />
       <div className="editor-shell">
         <main className="workspace-card">
           <header className="workspace-header">

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { KeyRound, LockKeyhole, ShieldCheck } from "lucide-react";
 import { NavBar } from "../../shared/components/NavBar";
 import { useChangePasswordMutation } from "../../features/auth/hooks/useAuthMutation";
+import { useMe } from "../../features/auth/hooks/useMe";
 import "./ChangePassword.css";
 
 export const ChangePassword: React.FC = () => {
@@ -28,10 +29,13 @@ export const ChangePassword: React.FC = () => {
         changePassword(password, { onSuccess: () => setPassword({ oldPassword: "", newPassword: "" }) });
     };
 
+    const { data } = useMe();
+    const username = (data?.data as { name?: string } | undefined)?.name || (data as { name?: string } | undefined)?.name || "Developer";
+
     return (
         <main className="change-password-page">
             <div className="change-password-shell">
-                <NavBar />
+                <NavBar username={username} />
                 <section className="change-password-content" aria-labelledby="change-password-title">
                     <article className="change-password-card">
                         <header className="change-password-header">

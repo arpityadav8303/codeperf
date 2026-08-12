@@ -1,0 +1,279 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+.dashboard-page {
+  min-height: 100vh;
+  padding: 24px clamp(18px, 4vw, 64px) 40px;
+  background: radial-gradient(circle at 72% 10%, #1c1e20, #111314 45%, #0c0d0e 100%);
+  color: #f6f6f6;
+  font-family: 'DM Sans', Inter, sans-serif;
+}
+
+.dashboard-page .overview {
+  margin-top: 26px;
+}
+
+.overview h1 {
+  margin: 0;
+  font-size: 27px;
+  letter-spacing: -.6px;
+}
+
+.overview h3 {
+  margin: 5px 0 0;
+  color: #aeb1b4;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 23px;
+}
+
+.stat-card,
+.chart-card,
+.submission-table {
+  border: 1px solid #303335;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(27,29,30,.93), rgba(19,21,22,.94));
+  box-shadow: 0 8px 22px rgba(0,0,0,.14);
+}
+
+.stat-card {
+  min-height: 100px;
+  padding: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  margin: 0;
+  color: #c4c6c8;
+  font-size: 15px;
+}
+
+.stat-value {
+  margin: 18px 0 0;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #874308;
+  border-radius: 9px;
+  color: #ff7200;
+  background: rgba(94,49,9,.32);
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.chart-card {
+  min-height: 280px;
+  padding: 19px 20px;
+  overflow: hidden;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-header h2,
+.submission-table h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.chart-header svg {
+  color: #989b9e;
+}
+
+.donut-content {
+  height: 256px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(22px, 4vw, 52px);
+}
+
+.donut-wrap {
+  width: min(215px, 44%);
+  aspect-ratio: 1;
+}
+
+.donut-legend {
+  min-width: 210px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 16px;
+}
+
+.donut-legend li {
+  display: flex;
+  justify-content: space-between;
+  gap: 26px;
+  font-size: 15px;
+}
+
+.donut-legend li span {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.donut-legend i {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+}
+
+.line-wrap {
+  height: 250px;
+  position: relative;
+  padding: 19px 0 0;
+}
+
+.line-wrap canvas {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 231px !important;
+}
+
+.submission-table {
+  margin-top: 18px;
+  padding: 20px;
+}
+
+.submission-table h2 {
+  margin-bottom: 14px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th,
+td {
+  height: 52px;
+  padding: 0 12px;
+  text-align: left;
+  border-bottom: 1px solid #303234;
+}
+
+th {
+  color: #aeb1b3;
+  font-weight: 400;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr:hover {
+  background: rgba(255,255,255,.025);
+}
+
+.complexity-badge {
+  display: inline-flex;
+  padding: 4px 8px;
+  border: 1px solid #8c6100;
+  border-radius: 5px;
+  color: #ffb000;
+  background: #2e2208;
+  font-size: 13px;
+}
+
+.status-text {
+  color: #aeb1b3;
+}
+
+.error-text {
+  color: #ff735c;
+}
+
+@media (max-width: 850px) {
+  .cards,
+  .charts {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card {
+    min-height: 310px;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard-page {
+    padding: 16px;
+  }
+
+  .dashboard-page .overview {
+    margin-top: 18px;
+  }
+
+  .stat-card {
+    min-height: 120px;
+    padding: 20px;
+  }
+
+  .stat-value {
+    margin-top: 12px;
+    font-size: 31px;
+  }
+
+  .stat-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .stat-icon svg {
+    width: 30px;
+  }
+
+  .donut-content {
+    gap: 16px;
+  }
+
+  .donut-wrap {
+    width: 145px;
+  }
+
+  .donut-legend {
+    min-width: 142px;
+    gap: 10px;
+  }
+
+  .donut-legend li {
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .donut-legend i {
+    width: 11px;
+    height: 11px;
+  }
+}

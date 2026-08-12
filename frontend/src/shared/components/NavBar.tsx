@@ -1,26 +1,83 @@
-import { useMe } from "../../features/auth/hooks/useMe";
-import { NavLink } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import "./NavBar.css";
 
-export const NavBar = () => {
-  const { data, isLoading, error } = useMe();
+export interface NavBarLink {
+  label: string;
+  path: string;
+}
 
-  if (isLoading) return <div className="mb-4 text-sm text-[#A6A6A6]">Loading...</div>;
-  if (error) return <div className="mb-4 text-sm text-[#FFB199]">Unable to load profile</div>;
+export interface NavBarProps {
+  username: string;
+  links?: NavBarLink[];
+}
 
-  const user = data?.data || data;
-  const linkClass = ({ isActive }: { isActive: boolean }) => `rounded px-3 py-2 text-sm transition ${isActive ? "bg-[#2A2A2A] text-white" : "text-[#A6A6A6] hover:bg-[#2A2A2A] hover:text-white"}`;
+const defaultLinks: NavBarLink[] = [
+  { label: "Dashboard", path: "/dashboard" },
+  { label: "Editor", path: "/editor" },
+  { label: "Security", path: "/changePassword" },
+];
+
+export const NavBar: React.FC<NavBarProps> = ({ username, links = defaultLinks }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const navRef = useRef<HTMLElement>(null);
+  const userName = username || "Developer";
+
+  useEffect(() => {
+    if (menuOpen) {
+      setMenuOpen(false);
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!navRef.current) return;
+      if (event.target instanceof Node && !navRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [menuOpen]);
 
   return (
-    <nav className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded border border-[#2A2A2A] bg-[#1A1A1A] px-4 py-3" aria-label="Primary navigation">
-      <div>
-        <h1 className="text-lg font-semibold text-white">CodePerf</h1>
-        <p className="text-sm text-[#A6A6A6]">Welcome, {user?.name || "Developer"}</p>
+    <header className="navbar" ref={navRef}>
+      <div className="navbar-inner">
+        <div className="navbar-brand">
+          <div className="navbar-title">CodePerf</div>
+          <div className="navbar-subtitle">Welcome, {userName}</div>
+        </div>
+
+        <button
+          type="button"
+          className="navbar-toggle"
+          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((current) => !current)}
+        >
+          {menuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+
+        <nav className={`navbar-links ${menuOpen ? "navbar-links-open" : ""}`} aria-label="Primary navigation">
+          {links.map((link) => (
+            <NavLink
+              key={link.path}
+              to={link.path}
+              className={({ isActive }) =>
+                `navbar-link${isActive ? " navbar-link-active" : ""}`
+              }
+              onClick={() => setMenuOpen(false)}
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
       </div>
-      <div className="flex flex-wrap items-center gap-1">
-        <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>
-        <NavLink to="/editor" className={linkClass}>Editor</NavLink>
-        <NavLink to="/changePassword" className={linkClass}>Security</NavLink>
-      </div>
-    </nav>
+    </header>
   );
 };

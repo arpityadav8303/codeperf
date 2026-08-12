@@ -79,6 +79,7 @@ export class SubmissionService {
             .createQueryBuilder("submission")
             .leftJoinAndSelect("submission.benchmarks", "benchmark")
             .where("submission.id = :id", { id })
+            .addOrderBy("benchmark.inputSize", "ASC")
             .getOne();
 
         return result;
