@@ -86,7 +86,6 @@ export class SubmissionService {
     }
     async list(userId: string, limit: number, offset: number, filters?: { language?: string; complexity?: string }) {
         const { results, total } = await this.subRepo.findAllByUser(userId, limit, offset, filters);
-        console.log(limit, '=====limit');
         const totalPages = Math.ceil(total / limit);
         return {
             success: true,

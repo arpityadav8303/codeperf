@@ -9,7 +9,7 @@ import { MonacoEditorPage } from '../pages/codeEditor/MonacoEditorPage';
 import { SubmissionResultPage } from '../pages/codeEditor/SubmissionResultPage';
 import { ChangePassword } from '../pages/Auth/ChangePassword';
 import { SignUp } from '../pages/Auth/SignUp';
-
+import { SubmissionHistory } from '../pages/SubmissionHistory';
 function Router() {
   return (
     <BrowserRouter>
@@ -18,7 +18,7 @@ function Router() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/ResetPassword" element={<ResetPassword />} />
         <Route path="/login-success" element={<LoginSuccess />} />
-        <Route path='/changePassword' element = { <ProtectedRoute><ChangePassword/></ProtectedRoute>}/>
+        <Route path='/changePassword' element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route
           path="/dashboard"
           element={
@@ -42,6 +42,12 @@ function Router() {
               <SubmissionResultPage />
             </ProtectedRoute>
           }
+        />
+        <Route path='/submission-history' element={
+          <ProtectedRoute>
+            <SubmissionHistory />
+          </ProtectedRoute>
+        }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

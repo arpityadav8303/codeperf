@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  ArcElement,
+ ArcElement,
   CategoryScale,
   Chart as ChartJS,
   Filler,
@@ -16,6 +16,7 @@ import { AlertTriangle, MoreHorizontal, Send, Share2 } from "lucide-react";
 import { NavBar } from "../../shared/components/NavBar";
 import { useMe } from "../../features/auth/hooks/useMe";
 import { DashboardService } from "../../features/dashboard";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 ChartJS.register(
@@ -135,7 +136,7 @@ export const DashboardPage: React.FC = () => {
   const [recentSubmissions, setRecentSubmissions] = useState<RecentSubmission[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     async function getData() {
       try {
@@ -157,7 +158,7 @@ export const DashboardPage: React.FC = () => {
 
     getData();
   }, []);
-
+   
   const formatDate = (iso: string) => new Date(iso).toLocaleString();
 
   const { data } = useMe();
@@ -218,7 +219,7 @@ export const DashboardPage: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {recentSubmissions.map((submission) => <tr key={submission.id}>
+              {recentSubmissions.map((submission) => <tr style={{ cursor: 'pointer' }} onClick={() => navigate(`/submissions/${submission.id}`)} key={submission.id}>
                 <td>{submission.row_num}</td>
                 <td style={{ display: "flex", alignItems: "center", gap: "6px" }}>{languageIcons[submission.language.toLowerCase()] || null}{submission.language}</td>
                 <td><span className="complexity-badge">{submission.detectedComplexity}</span></td>

@@ -171,7 +171,7 @@ export function SubmissionResultPage() {
             <h2>Benchmark Curve</h2>
             <div className="chart-placeholder">
               {/* <ChartNoAxesCombined size={46} strokeWidth={1.5} /> */}
-              <Line data={data} options={chartOptions} />
+              <Line data={datas} options={chartOptions} />
             </div>
           </article>
 
