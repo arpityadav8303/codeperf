@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { repositioryService, WhereCondition } from "../services/Repository.services"
 import { z } from "zod";
-
+import { getGithubReposForInstallation } from "../utils/github";
 const updateConfigSchema = z.object({
     blockOnRegression: z.boolean({
         message: "blockOnRegression must be a boolean value"
@@ -14,7 +14,7 @@ const updateConfigSchema = z.object({
 });
 
 const updatedStatusSchema = z.object({
-   isActive: z.preprocess((val: any) => {
+    isActive: z.preprocess((val: any) => {
         if (typeof val === 'object' && val !== null && 'status' in val) {
             val = val.status;
         }
@@ -22,7 +22,7 @@ const updatedStatusSchema = z.object({
         if (val === true || val === "true" || val === 1 || val === "1") {
             return true;
         }
-        
+
         if (val === 0 || val === "0") {
             return false;
         }
@@ -44,7 +44,7 @@ export class RepoController {
             return res.status(401).json({ message: "Unauthorized" });
         }
         const select = ["githubRepoId", "fullName", "blockOnRegression", "regressionThresholdX", "createdAt", "isActive"];
-        const whereCondition: WhereCondition[] = [{ name: "userId", op: "is", value: id }, {name: "isActive", op: "is", value: "1"}];
+        const whereCondition: WhereCondition[] = [{ name: "userId", op: "is", value: id }, { name: "isActive", op: "is", value: "1" }];
         const data = await this.repoService.list(10, 0, select, whereCondition, [], [], []);
         return res.status(200).json(data);
     }
@@ -122,7 +122,7 @@ export class RepoController {
                     errors: validationResult.error.issues.map(issue => issue.message)
                 });
             }
-            
+
             const { isActive } = validationResult.data;
             const githubRepoId = req.params.id;
             const authUserId = req.user.id;
@@ -147,6 +147,23 @@ export class RepoController {
             return res.status(500).json({
                 success: false,
                 message: "Internal server error occurred while updating repository configs"
+            });
+        }
+    }
+
+    public async getRepos(req: Request, res: Response): Promise<any> {
+        try {
+            const installationId = process.env.GITHUB_INSTALLATION_ID!;
+            const repositories = await getGithubReposForInstallation(installationId);
+            return res.status(200).json({
+                success: true,
+                data: repositories,
+            });
+        } catch (error) {
+            console.error("GitHub repositories error:", error);
+            return res.status(500).json({
+                success: false,
+                message: "Failed to fetch GitHub repositories",
             });
         }
     }

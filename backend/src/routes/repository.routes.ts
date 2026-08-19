@@ -10,4 +10,5 @@ router.post("/connectRepo", authenticate, (req, res) => repoController.connectRe
 router.get("/:id/get-allFunctions", authenticate, (req,res)=> repoController.repofunction(req,res));
 router.put("/:id/update-config", authenticate, (req,res)=> repoController.updateConfig(req,res));
 router.put("/:id/update-status", authenticate, (req,res)=> repoController.updateRepoStatus(req,res));
+router.get("/get-github-repos-List", authenticate, (req,res)=>repoController.getRepos(req,res))
 export default router;
