@@ -23,6 +23,7 @@ export class WebhookController {
         const payload = req.body;
         const eventType = req.headers['x-github-event'];
         console.log(eventType,'eventype-=-=-=-=')
+        console.log(payload,'payload=-=-=-=-=');
         res.status(200).json({ success: true, message: 'Event acknowledged' });
 
         if (eventType === 'pull_request') {
