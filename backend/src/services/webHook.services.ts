@@ -26,7 +26,7 @@ export class GithubService {
         // 3. Add analysis job to BullMQ
         // --------------------------------
 
-        await this.analysisQueue.add("github-pr-analysis", { githubRepoId: String(connectedRepo.githubRepoId), userId: String(connectedRepo.user.id), prNumber, headSha, changedFiles });
+        await this.analysisQueue.add("analyzeGithubPR", { githubRepoId: String(connectedRepo.githubRepoId), userId: String(connectedRepo.user.id), prNumber, headSha, changedFiles });
     };
 }
 
