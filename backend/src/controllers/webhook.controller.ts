@@ -8,7 +8,6 @@ export class WebhookController {
         if (!signature) {
             return res.status(401).json({ success: false, message: 'Missing signature header' });
         }
-
         const secret = process.env.GITHUB_WEBHOOK_SECRET || '';
         const rawBody = (req as any).rawBody || '';
         const computedSignature = `sha256=${crypto
@@ -21,10 +20,9 @@ export class WebhookController {
         if (!isVerified) {
             return res.status(401).json({ success: false, message: 'Invalid signature' });
         }
-
         const payload = req.body;
         const eventType = req.headers['x-github-event'];
-
+        console.log(eventType,'eventype-=-=-=-=')
         res.status(200).json({ success: true, message: 'Event acknowledged' });
 
         if (eventType === 'pull_request') {
