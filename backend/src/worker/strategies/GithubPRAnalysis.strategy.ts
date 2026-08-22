@@ -2,25 +2,19 @@
 import { AppDataSource } from "../../data-source";
 import { Submission } from "../../models/Submission";
 import { Benchmark } from "../../models/Benchmark";
-import { GitRepos } from "../../repositiory/GitRepository.repo"; 
+import { GitRepos } from "../../repositiory/GitRepository.repo";
 import { sendToSubscribers } from "../../services/notification.service";
 
 export class GithubPRAnalysisStrategy {
     private submissionRepo = AppDataSource.getRepository(Submission);
 
-    async execute(data: { 
-        githubRepoId: string; 
-        userId: string;
-        prNumber: number;
-        headSha: string;
-        changedFiles: string[];
-    }): Promise<void> {
+    async execute(data: {githubRepoId: string;userId: string;prNumber: number;headSha: string;changedFiles: string[];}): Promise<void> {
         const { githubRepoId, userId, prNumber, headSha, changedFiles } = data;
         console.log(`[Worker] Starting automated PR analysis for Repo ID: ${githubRepoId}, PR #${prNumber}`);
 
         // 1. Database se connected repository configurations nikalna
         const connectedRepo = await GitRepos.findOne({
-            where: { 
+            where: {
                 githubRepoId: githubRepoId,
                 user: { id: userId }
             }
@@ -34,12 +28,12 @@ export class GithubPRAnalysisStrategy {
         // 2. Submissions table mein placeholder record banana (Status: running)
         const prSubmission = this.submissionRepo.create({
             code: `// Automated Scan for PR #${prNumber}\n// Head SHA: ${headSha}\n// Files changed: ${changedFiles.join(', ')}`,
-            language: "javascript", 
+            language: "javascript",
             status: "running",
             repository: { id: connectedRepo.id } as any,
             user: { id: userId } as any
         });
-        
+
         const savedSubmission = await this.submissionRepo.save(prSubmission);
 
         // Live WebSocket progress alert dena frontend ko (10%)
@@ -113,7 +107,7 @@ export class GithubPRAnalysisStrategy {
         } catch (error: any) {
             await queryRunner.rollbackTransaction();
             await this.submissionRepo.update(savedSubmission.id, { status: "failed" });
-            
+
             sendToSubscribers(savedSubmission.id, {
                 type: "failed",
                 submissionId: savedSubmission.id,
