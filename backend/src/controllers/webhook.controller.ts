@@ -22,8 +22,6 @@ export class WebhookController {
         }
         const payload = req.body;
         const eventType = req.headers['x-github-event'];
-        console.log(eventType,'eventype-=-=-=-=')
-        console.log(payload,'payload=-=-=-=-=');
         res.status(200).json({ success: true, message: 'Event acknowledged' });
 
         if (eventType === 'pull_request') {
@@ -37,8 +35,6 @@ export class WebhookController {
 
                 console.log(`🚀 Triggering asynchronous CodePerf analysis loop for PR #${prNumber} on ${repoFullName} (commit: ${headSha})`);
                 await this.gitHubService.pullRequestEventHandler(installationId, repoFullName, prNumber, headSha);
-                // TODO: BullMQ integration - pass this payload directly to your analysis queue!
-                // await analysisQueue.add('github-pr-analysis', { repoFullName, prNumber, headSha, installationId });
             }
         }
     }
