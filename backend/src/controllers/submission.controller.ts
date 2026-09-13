@@ -1,6 +1,8 @@
 import { date, success } from "zod";
 import { SubmissionService } from "../services/Submission.Services";
-import { Request, Response, NextFunction} from "express";
+import { Request, Response, NextFunction } from "express";
+import path from "path";
+const fs1 = require("fs");
 export class Submission {
     constructor(private submissionService = new SubmissionService) { }
 
@@ -96,21 +98,37 @@ export class Submission {
         }
     }
 
-    async getSubmissionReview(req: Request, res: Response, next: NextFunction)  {
-    try {
-        const { id } = req.params;
-        const userId = req.user.id; // From auth middleware
+    async getSubmissionReview(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id; // From auth middleware
 
-        const reviewData = await this.submissionService.getAIReview(userId, id);
+            const reviewData = await this.submissionService.getAIReview(userId, id);
 
-        return res.status(200).json({
-            success: true,
-            date: reviewData,
-            message:"AI review placeholder retrieved"
-        })
-    } catch (error) {
-        next(error); // Caught by your global error handler
+            return res.status(200).json({
+                success: true,
+                date: reviewData,
+                message: "AI review placeholder retrieved"
+            })
+        } catch (error) {
+            next(error); // Caught by your global error handler
+        }
+    };
+
+    public async fileSubmission(req: Request, res: Response): Promise<any> {
+        try {
+            const file = (req as any).file;
+            console.log(file);
+            const filePath = path.join(process.cwd(), "uploads", file.filename);
+            console.log(filePath,'=-=-==-=-=--=');
+            const data = fs1.readFileSync(filePath, 'utf8')
+            console.log(data);
+            return res.status(200).json({
+                message: "file uploaded sucessfully"
+            })
+        } catch (error) {
+            
+        }
     }
-};
 }
 export default new Submission();
