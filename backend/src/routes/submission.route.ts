@@ -1,5 +1,5 @@
 import { Router } from "express";
-import submissionController from "../controllers/Submission.controller";
+import submissionController from "../controllers/submission.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { rateLimiter } from "../middlewares/rateLimiter.middleware";
 

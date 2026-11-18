@@ -4,9 +4,10 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import { AppDataSource } from "./data-source";
+// import { AppDataSource } from "./data-source";
 import { setupRoutes } from "./routes";
 import { setupWebSocket } from './config/webSocket.setup';
+import { AppDataSource } from './data-source.postgres';
 import "./worker/analysis.worker";
 import cors from 'cors';
 dotenv.config();
@@ -55,8 +56,22 @@ app.use(
 setupRoutes(app);
 
 
-AppDataSource.initialize()
-    .then(() => {
+// AppDataSource.initialize()
+//     .then(() => {
+//         console.log("Data Source has been initialized!");
+//         const PORT = process.env.PORT || 3001;
+//         const httpServer = app.listen(PORT, () => {
+//             console.log(`Server is running on http://localhost:${PORT}`);
+//         });
+//         setupWebSocket(httpServer);
+//         console.log(`WebSocket server ready on ws://localhost:${PORT}/ws`);
+//     })
+//     .catch((err) => {
+//         console.error("Error during Data Source initialization:", err);
+//     });
+
+    AppDataSource.initialize()
+    .then(()=>{
         console.log("Data Source has been initialized!");
         const PORT = process.env.PORT || 3001;
         const httpServer = app.listen(PORT, () => {

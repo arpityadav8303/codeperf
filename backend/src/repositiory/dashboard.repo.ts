@@ -1,4 +1,4 @@
-import { AppDataSource } from "../data-source";
+import { AppDataSource } from "../data-source.postgres";
 import { Submission } from "../models/Submission";
 import { GitRepository } from "../models/Repository";
 

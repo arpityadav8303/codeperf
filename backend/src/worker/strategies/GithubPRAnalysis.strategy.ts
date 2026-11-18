@@ -1,5 +1,6 @@
 // backend/src/worker/strategies/GithubPRAnalysis.strategy.ts
-import { AppDataSource } from "../../data-source";
+// import { AppDataSource } from "../../data-source";
+import { AppDataSource } from "../../data-source.postgres";
 import { Submission } from "../../models/Submission";
 import { Benchmark } from "../../models/Benchmark";
 import { GitRepos } from "../../repositiory/GitRepository.repo"; 

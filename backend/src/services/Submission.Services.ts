@@ -2,7 +2,8 @@ import { SubmissionRepository } from "../repositiory/Submission.Repo";
 import { BenchmarkRepository } from "../repositiory/Benchmark.Repo";
 import { Submission } from "../models/Submission";
 import { Benchmark } from "../models/Benchmark";
-import { AppDataSource } from "../data-source"
+// import { AppDataSource } from "../data-source"
+import { AppDataSource } from "../data-source.postgres";
 import { redisClient, redisConnectionOptions } from '../config/redis.config';
 import { Queue } from "bullmq";
 
