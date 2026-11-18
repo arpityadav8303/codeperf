@@ -109,3 +109,15 @@ export const getGithubReposForInstallation = async (installationId: string) => {
 
     return repositories;
 };
+export const getPullRequestFiles = async (installationId: any, repoFullName: string, prNumber: number) => {
+    const installationToken = await getInstallationAccessToken(installationId);
+    const url = `https://api.github.com/repos/${repoFullName}/pulls/${prNumber}/files`;
+    const res = await axios.get(url, {
+        headers: {
+            Authorization: `Bearer ${installationToken}`,
+            Accept: "application/vnd.github+json",
+        }
+    })
+    return res.data;
+}
+

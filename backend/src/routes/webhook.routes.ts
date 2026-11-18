@@ -1,9 +1,11 @@
 import { Router } from 'express';
-import { handleGithubWebhook } from '../controllers/webhook.controller';
+
+import { WebhookController } from '../controllers/webhook.controller';
 
 const router = Router();
+const webhookController = new WebhookController();
 
 // Endpoint mapped to: POST /api/v1/webhooks/github
-router.post('/github', handleGithubWebhook);
+router.post('/github', (req, res) => webhookController.handleGithubWebhook(req, res));
 
 export default router;
